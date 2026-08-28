@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { BookOpen, Sparkles, Key, Zap, Globe, HardDrive, Cpu, Bot, Settings2 } from 'lucide-react';
+import { BookOpen, Sparkles, Zap, Globe, HardDrive, Cpu, Bot, Settings2 } from 'lucide-react';
 import { AI_PROVIDERS } from '@/lib/constants';
 import { AIProviderId, UserAISettings } from '@/types/exam';
 
@@ -31,6 +31,8 @@ export const Navbar: React.FC<NavbarProps> = ({ aiSettings, onOpenApiKeyModal })
         return <Cpu className="w-3.5 h-3.5 text-cyan-500" />;
       case 'openai':
         return <Bot className="w-3.5 h-3.5 text-emerald-600" />;
+      case 'anthropic':
+        return <Bot className="w-3.5 h-3.5 text-orange-500" />;
     }
   };
 

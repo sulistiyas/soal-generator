@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import {
   EducationLevel,
   CurriculumType,
@@ -57,10 +57,11 @@ export const ExamForm: React.FC<ExamFormProps> = ({
   const [pgCount, setPgCount] = useState(10);
   const [essayCount, setEssayCount] = useState(3);
   const [difficulty, setDifficulty] = useState<'seimbang' | 'hots' | 'mudah'>('seimbang');
-  const [additionalInstructions, setAdditionalInstructions] = useState('');
+  const [additionalInstructions] = useState('');
 
-  useEffect(() => {
-    const currentLevel = EDUCATION_LEVELS[level];
+  const handleLevelChange = (newLevel: EducationLevel) => {
+    setLevel(newLevel);
+    const currentLevel = EDUCATION_LEVELS[newLevel];
     if (currentLevel) {
       if (currentLevel.grades.length > 0) {
         const firstGrade = currentLevel.grades[0];
@@ -70,7 +71,7 @@ export const ExamForm: React.FC<ExamFormProps> = ({
         setSubject(currentLevel.subjects[0]);
       }
     }
-  }, [level]);
+  };
 
   const handleCategoryChange = (cat: ExamCategory) => {
     setExamCategory(cat);
@@ -132,6 +133,8 @@ export const ExamForm: React.FC<ExamFormProps> = ({
         return <Cpu className="w-4 h-4 text-cyan-500" />;
       case 'openai':
         return <Bot className="w-4 h-4 text-emerald-600" />;
+      case 'anthropic':
+        return <Bot className="w-4 h-4 text-orange-500" />;
     }
   };
 
@@ -186,7 +189,7 @@ export const ExamForm: React.FC<ExamFormProps> = ({
               <button
                 key={lvl}
                 type="button"
-                onClick={() => setLevel(lvl)}
+                onClick={() => handleLevelChange(lvl)}
                 className={`px-3.5 py-2.5 rounded-xl text-xs font-semibold border transition-all text-center cursor-pointer ${
                   level === lvl
                     ? 'bg-blue-600 text-white border-blue-600 shadow-sm shadow-blue-500/20'
@@ -395,7 +398,7 @@ export const ExamForm: React.FC<ExamFormProps> = ({
             </label>
             <select
               value={difficulty}
-              onChange={(e) => setDifficulty(e.target.value as any)}
+              onChange={(e) => setDifficulty(e.target.value as 'seimbang' | 'hots' | 'mudah')}
               className="w-full text-sm px-3.5 py-2 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 bg-white"
             >
               <option value="seimbang">Seimbang (30% LOTS, 50% MOTS, 20% HOTS)</option>

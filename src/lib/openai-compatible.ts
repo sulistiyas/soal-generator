@@ -123,7 +123,7 @@ Struktur JSON yang WAJIB dihasilkan:
     headers['X-Title'] = 'Generator Soal Indonesia';
   }
 
-  const payload: any = {
+  const payload: Record<string, unknown> = {
     model: model,
     messages: [
       { role: 'system', content: systemInstruction },
@@ -189,13 +189,14 @@ Struktur JSON yang WAJIB dihasilkan:
 
     const parsedExamData: ExamData = JSON.parse(cleanJson);
     return parsedExamData;
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error(`Error in generateExamWithOpenAICompatible (${provider}):`, error);
-    if (provider === 'ollama' && error?.message?.includes('fetch failed')) {
+    const errorMsg = error instanceof Error ? error.message : '';
+    if (provider === 'ollama' && errorMsg.includes('fetch failed')) {
       throw new Error(
         'Gagal terhubung ke Ollama lokal. Pastikan aplikasi Ollama sudah menyala dan berjalan di port 11434.'
       );
     }
-    throw new Error(error?.message || `Gagal menghasilkan soal dengan provider ${provider}.`);
+    throw new Error(errorMsg || `Gagal menghasilkan soal dengan provider ${provider}.`);
   }
 }

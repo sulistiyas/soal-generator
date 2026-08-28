@@ -1,4 +1,4 @@
-﻿'use client';
+'use client';
 
 import React, { useState } from 'react';
 import { ExamData, QuestionItem } from '@/types/exam';
@@ -53,21 +53,21 @@ export const ExamPreview: React.FC<ExamPreviewProps> = ({ exam, onUpdateExam, on
   };
 
   const handleCopyText = () => {
-    let plainText = `${exam.schoolName}\n${exam.examTitle}\nMata Pelajaran: ${exam.subject} | Kelas: ${exam.grade}\n\n`;
+    let plainText = `${exam.schoolName || 'SEKOLAH'}\n${exam.examTitle || 'UJIAN'}\nMata Pelajaran: ${exam.subject || '-'} | Kelas: ${exam.grade || '-'}\n\n`;
 
-    exam.questions.forEach((q) => {
-      plainText += `${q.number}. ${q.question}\n`;
-      if (q.options) {
+    (exam.questions || []).forEach((q) => {
+      plainText += `${q.number}. ${q.question || ''}\n`;
+      if (Array.isArray(q.options)) {
         q.options.forEach((opt) => {
-          plainText += `   ${opt.key}. ${opt.text}\n`;
+          if (opt) plainText += `   ${opt.key}. ${opt.text || ''}\n`;
         });
       }
       plainText += '\n';
     });
 
     plainText += '\n--- KUNCI JAWABAN ---\n';
-    exam.questions.forEach((q) => {
-      plainText += `No ${q.number}: ${q.correctAnswer} - ${q.explanation}\n`;
+    (exam.questions || []).forEach((q) => {
+      plainText += `No ${q.number}: ${q.correctAnswer || '-'} - ${q.explanation || '-'}\n`;
     });
 
     navigator.clipboard.writeText(plainText);

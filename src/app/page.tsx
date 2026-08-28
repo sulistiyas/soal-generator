@@ -1,54 +1,71 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Navbar } from '@/components/Navbar';
 import { ApiKeyModal } from '@/components/ApiKeyModal';
 import { ExamForm } from '@/components/ExamForm';
 import { ExamPreview } from '@/components/ExamPreview';
-import { ExamData, ExamGenerationRequest, UserAISettings } from '@/types/exam';
+import { ExamData, ExamGenerationRequest, UserAISettings, AIProviderId } from '@/types/exam';
 import { DEFAULT_AI_SETTINGS, AI_PROVIDERS } from '@/lib/constants';
 import { Sparkles, ShieldAlert } from 'lucide-react';
 
+function getInitialAISettings(): UserAISettings {
+  if (typeof window === 'undefined') return DEFAULT_AI_SETTINGS;
+  try {
+    const savedSettings = localStorage.getItem('edusoal_ai_settings');
+    let loaded: UserAISettings = { ...DEFAULT_AI_SETTINGS };
+
+    if (savedSettings) {
+      const parsed = JSON.parse(savedSettings);
+      const activeProv: AIProviderId = AI_PROVIDERS.some((p) => p.id === parsed?.activeProvider)
+        ? parsed.activeProvider
+        : 'gemini';
+
+      const mergedProviders: Record<AIProviderId, { apiKey: string; model: string; customBaseUrl?: string }> = {
+        ...DEFAULT_AI_SETTINGS.providers,
+      };
+
+      for (const prov of AI_PROVIDERS) {
+        const savedProv = parsed?.providers?.[prov.id];
+        const availableModelIds = prov.availableModels.map((m) => m.id);
+        let model = savedProv?.model || prov.defaultModel;
+
+        // If the cached model is invalid or legacy, migrate to the latest default model
+        if (!availableModelIds.includes(model) && model !== 'custom' && !model.includes(':')) {
+          model = prov.defaultModel;
+        }
+
+        mergedProviders[prov.id] = {
+          apiKey: savedProv?.apiKey || '',
+          model: model,
+          customBaseUrl: savedProv?.customBaseUrl || prov.defaultBaseUrl || '',
+        };
+      }
+
+      loaded = {
+        activeProvider: activeProv,
+        providers: mergedProviders,
+      };
+    } else {
+      // Check for legacy single gemini key
+      const legacyGeminiKey = localStorage.getItem('edusoal_gemini_api_key');
+      if (legacyGeminiKey) {
+        loaded.providers.gemini.apiKey = legacyGeminiKey;
+      }
+    }
+    return loaded;
+  } catch (e) {
+    console.error('Failed to load/migrate saved AI settings:', e);
+    return DEFAULT_AI_SETTINGS;
+  }
+}
+
 export default function Home() {
-  const [aiSettings, setAiSettings] = useState<UserAISettings>(DEFAULT_AI_SETTINGS);
+  const [aiSettings, setAiSettings] = useState<UserAISettings>(getInitialAISettings);
   const [isApiKeyModalOpen, setIsApiKeyModalOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [examData, setExamData] = useState<ExamData | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
-
-  useEffect(() => {
-    try {
-      const savedSettings = localStorage.getItem('edusoal_ai_settings');
-      if (savedSettings) {
-        const parsed = JSON.parse(savedSettings);
-        setAiSettings({
-          ...DEFAULT_AI_SETTINGS,
-          ...parsed,
-          providers: {
-            ...DEFAULT_AI_SETTINGS.providers,
-            ...(parsed.providers || {}),
-          },
-        });
-      } else {
-        // Check for legacy single gemini key
-        const legacyGeminiKey = localStorage.getItem('edusoal_gemini_api_key');
-        if (legacyGeminiKey) {
-          setAiSettings((prev) => ({
-            ...prev,
-            providers: {
-              ...prev.providers,
-              gemini: {
-                ...prev.providers.gemini,
-                apiKey: legacyGeminiKey,
-              },
-            },
-          }));
-        }
-      }
-    } catch (e) {
-      console.error('Failed to load saved AI settings:', e);
-    }
-  }, []);
 
   const handleSaveSettings = (newSettings: UserAISettings) => {
     setAiSettings(newSettings);
@@ -82,9 +99,10 @@ export default function Home() {
 
       setExamData(result.data);
       window.scrollTo({ top: 0, behavior: 'smooth' });
-    } catch (err: any) {
-      setErrorMessage(err.message || 'Terjadi kesalahan saat menghubungi server.');
-      
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : 'Terjadi kesalahan saat menghubungi server.';
+      setErrorMessage(msg);
+
       const activeProvider = AI_PROVIDERS.find((p) => p.id === aiSettings.activeProvider);
       const activeProviderSetting = aiSettings.providers[aiSettings.activeProvider];
       if (activeProvider?.requiresApiKey && !activeProviderSetting?.apiKey) {

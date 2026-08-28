@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import {
   X,
   ExternalLink,
@@ -14,9 +14,8 @@ import {
   Cpu,
   Bot,
   CheckCircle2,
-  AlertTriangle,
 } from 'lucide-react';
-import { AI_PROVIDERS, DEFAULT_AI_SETTINGS } from '@/lib/constants';
+import { AI_PROVIDERS } from '@/lib/constants';
 import { AIProviderId, UserAISettings } from '@/types/exam';
 
 interface ApiKeyModalProps {
@@ -37,10 +36,13 @@ export const ApiKeyModal: React.FC<ApiKeyModalProps> = ({
   const [showKey, setShowKey] = useState(false);
   const [savedSuccess, setSavedSuccess] = useState(false);
 
-  useEffect(() => {
+  // Sync state if aiSettings changed externally
+  const [prevAiSettings, setPrevAiSettings] = useState(aiSettings);
+  if (prevAiSettings !== aiSettings) {
+    setPrevAiSettings(aiSettings);
     setCurrentSettings(aiSettings);
     setActiveTab(aiSettings.activeProvider || 'gemini');
-  }, [aiSettings, isOpen]);
+  }
 
   if (!isOpen) return null;
 
@@ -122,6 +124,8 @@ export const ApiKeyModal: React.FC<ApiKeyModalProps> = ({
         return <Cpu className="w-4 h-4 text-cyan-500" />;
       case 'openai':
         return <Bot className="w-4 h-4 text-emerald-600" />;
+      case 'anthropic':
+        return <Bot className="w-4 h-4 text-orange-500" />;
     }
   };
 
@@ -226,7 +230,11 @@ export const ApiKeyModal: React.FC<ApiKeyModalProps> = ({
                 Pilih Model AI
               </label>
               <select
-                value={activeProviderSettings.model || activeConfig.defaultModel}
+                value={
+                  activeConfig.availableModels.some((m) => m.id === activeProviderSettings.model)
+                    ? activeProviderSettings.model
+                    : 'custom'
+                }
                 onChange={(e) => handleModelChange(e.target.value)}
                 className="w-full text-xs sm:text-sm px-3.5 py-2.5 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 bg-white font-medium"
               >
@@ -236,6 +244,22 @@ export const ApiKeyModal: React.FC<ApiKeyModalProps> = ({
                   </option>
                 ))}
               </select>
+
+              {(!activeConfig.availableModels.some((m) => m.id === activeProviderSettings.model && m.id !== 'custom') ||
+                activeProviderSettings.model === 'custom') && (
+                <div className="mt-2">
+                  <label className="block text-[11px] font-semibold text-slate-600 mb-1">
+                    Ketik Nama Model Custom (misal: <code>phi4:14b</code>, <code>mistral-nemo:12b</code>)
+                  </label>
+                  <input
+                    type="text"
+                    value={activeProviderSettings.model === 'custom' ? '' : activeProviderSettings.model}
+                    onChange={(e) => handleModelChange(e.target.value || 'custom')}
+                    placeholder="Contoh: qwen2.5-coder:7b"
+                    className="w-full px-3 py-2 text-xs sm:text-sm rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 font-mono bg-white"
+                  />
+                </div>
+              )}
             </div>
 
             {/* API Key or Endpoint Input */}

@@ -1,4 +1,4 @@
-﻿import {
+import {
   Document,
   Paragraph,
   TextRun,
@@ -13,7 +13,27 @@
   Packer,
 } from 'docx';
 import { saveAs } from 'file-saver';
-import { ExamData } from '@/types/exam';
+import { ExamData, QuestionItem } from '@/types/exam';
+
+function safeStr(val: unknown, fallback: string = ''): string {
+  if (val === null || val === undefined) return fallback;
+  if (typeof val === 'string') return val;
+  if (typeof val === 'number' || typeof val === 'boolean') return String(val);
+  if (Array.isArray(val)) {
+    return val
+      .map((v) => safeStr(v, ''))
+      .filter(Boolean)
+      .join(', ');
+  }
+  if (typeof val === 'object') {
+    try {
+      return JSON.stringify(val);
+    } catch {
+      return fallback;
+    }
+  }
+  return String(val);
+}
 
 export async function exportExamToDocx(exam: ExamData) {
   const children: (Paragraph | Table)[] = [];
@@ -24,7 +44,7 @@ export async function exportExamToDocx(exam: ExamData) {
       alignment: AlignmentType.CENTER,
       children: [
         new TextRun({
-          text: exam.schoolName ? exam.schoolName.toUpperCase() : 'SEKOLAH CONTOH INDONESIA',
+          text: safeStr(exam.schoolName ? exam.schoolName.toUpperCase() : 'SEKOLAH CONTOH INDONESIA'),
           bold: true,
           size: 28, // 14pt
           font: 'Times New Roman',
@@ -35,7 +55,7 @@ export async function exportExamToDocx(exam: ExamData) {
       alignment: AlignmentType.CENTER,
       children: [
         new TextRun({
-          text: exam.examTitle || 'ASESMEN SUMATIF / NASKAH SOAL UJIAN',
+          text: safeStr(exam.examTitle, 'ASESMEN SUMATIF / NASKAH SOAL UJIAN'),
           bold: true,
           size: 24, // 12pt
           font: 'Times New Roman',
@@ -46,7 +66,7 @@ export async function exportExamToDocx(exam: ExamData) {
       alignment: AlignmentType.CENTER,
       children: [
         new TextRun({
-          text: `TAHUN AJARAN ${exam.academicYear} - SEMESTER ${exam.semester.toUpperCase()}`,
+          text: `TAHUN AJARAN ${safeStr(exam.academicYear, '2024/2025')} - SEMESTER ${safeStr(exam.semester, 'GANJIL').toUpperCase()}`,
           bold: true,
           size: 22, // 11pt
           font: 'Times New Roman',
@@ -85,13 +105,13 @@ export async function exportExamToDocx(exam: ExamData) {
               new Paragraph({
                 children: [
                   new TextRun({ text: 'Mata Pelajaran : ', bold: true, font: 'Times New Roman' }),
-                  new TextRun({ text: exam.subject, font: 'Times New Roman' }),
+                  new TextRun({ text: safeStr(exam.subject, '-'), font: 'Times New Roman' }),
                 ],
               }),
               new Paragraph({
                 children: [
                   new TextRun({ text: 'Kelas / Fase    : ', bold: true, font: 'Times New Roman' }),
-                  new TextRun({ text: exam.grade, font: 'Times New Roman' }),
+                  new TextRun({ text: safeStr(exam.grade, '-'), font: 'Times New Roman' }),
                 ],
               }),
             ],
@@ -102,7 +122,7 @@ export async function exportExamToDocx(exam: ExamData) {
               new Paragraph({
                 children: [
                   new TextRun({ text: 'Waktu            : ', bold: true, font: 'Times New Roman' }),
-                  new TextRun({ text: `${exam.durationMinutes} Menit`, font: 'Times New Roman' }),
+                  new TextRun({ text: `${safeStr(exam.durationMinutes, '90')} Menit`, font: 'Times New Roman' }),
                 ],
               }),
               new Paragraph({
@@ -136,18 +156,23 @@ export async function exportExamToDocx(exam: ExamData) {
     })
   );
 
-  (exam.instructions || [
-    'Berdoalah sebelum mengerjakan soal.',
-    'Tuliskan nomor dan nama Anda pada lembar jawaban yang tersedia.',
-    'Bacalah setiap butir soal dengan cermat dan teliti.',
-    'Periksalah kembali jawaban Anda sebelum diserahkan kepada pengawas.',
-  ]).forEach((inst, idx) => {
+  const instructionsList =
+    Array.isArray(exam.instructions) && exam.instructions.length > 0
+      ? exam.instructions
+      : [
+          'Berdoalah sebelum mengerjakan soal.',
+          'Tuliskan nomor dan nama Anda pada lembar jawaban yang tersedia.',
+          'Bacalah setiap butir soal dengan cermat dan teliti.',
+          'Periksalah kembali jawaban Anda sebelum diserahkan kepada pengawas.',
+        ];
+
+  instructionsList.forEach((inst, idx) => {
     children.push(
       new Paragraph({
         indent: { left: 360 },
         children: [
           new TextRun({
-            text: `${idx + 1}. ${inst}`,
+            text: `${idx + 1}. ${safeStr(inst)}`,
             font: 'Times New Roman',
             size: 20,
           }),
@@ -158,9 +183,10 @@ export async function exportExamToDocx(exam: ExamData) {
 
   children.push(new Paragraph({ spacing: { after: 250 } }));
 
-  // Pisahkan soal PG dan Uraian
-  const pgQuestions = exam.questions.filter((q) => q.type === 'pg');
-  const essayQuestions = exam.questions.filter((q) => q.type === 'uraian' || q.type === 'isian');
+  // Pisahkan soal PG dan Non-PG
+  const questions: QuestionItem[] = Array.isArray(exam.questions) ? exam.questions : [];
+  const pgQuestions = questions.filter((q) => q.type === 'pg');
+  const essayQuestions = questions.filter((q) => q.type !== 'pg');
 
   // ================= 4. BAGIAN I: PILIHAN GANDA =================
   if (pgQuestions.length > 0) {
@@ -191,13 +217,13 @@ export async function exportExamToDocx(exam: ExamData) {
 
     pgQuestions.forEach((q) => {
       // Stimulus jika ada
-      if (q.stimulus) {
+      if (q.stimulus && typeof q.stimulus === 'string' && q.stimulus.trim()) {
         children.push(
           new Paragraph({
             spacing: { before: 100, after: 80 },
             children: [
               new TextRun({
-                text: `Bacaan untuk soal nomor ${q.number}:`,
+                text: `Bacaan untuk soal nomor ${safeStr(q.number)}:`,
                 italics: true,
                 bold: true,
                 font: 'Times New Roman',
@@ -210,7 +236,7 @@ export async function exportExamToDocx(exam: ExamData) {
             spacing: { after: 100 },
             children: [
               new TextRun({
-                text: q.stimulus,
+                text: safeStr(q.stimulus),
                 italics: true,
                 font: 'Times New Roman',
                 size: 20,
@@ -226,13 +252,13 @@ export async function exportExamToDocx(exam: ExamData) {
           spacing: { before: 100, after: 60 },
           children: [
             new TextRun({
-              text: `${q.number}. `,
+              text: `${safeStr(q.number)}. `,
               bold: true,
               font: 'Times New Roman',
               size: 21,
             }),
             new TextRun({
-              text: q.question,
+              text: safeStr(q.question),
               font: 'Times New Roman',
               size: 21,
             }),
@@ -241,21 +267,22 @@ export async function exportExamToDocx(exam: ExamData) {
       );
 
       // Opsi Pilihan
-      if (q.options) {
+      if (Array.isArray(q.options)) {
         q.options.forEach((opt) => {
+          if (!opt) return;
           children.push(
             new Paragraph({
               indent: { left: 400 },
               spacing: { after: 40 },
               children: [
                 new TextRun({
-                  text: `${opt.key}. `,
+                  text: `${safeStr(opt.key)}. `,
                   bold: true,
                   font: 'Times New Roman',
                   size: 20,
                 }),
                 new TextRun({
-                  text: opt.text,
+                  text: safeStr(opt.text),
                   font: 'Times New Roman',
                   size: 20,
                 }),
@@ -274,7 +301,7 @@ export async function exportExamToDocx(exam: ExamData) {
         spacing: { before: 300, after: 150 },
         children: [
           new TextRun({
-            text: 'II. URAIAN / ESSAY',
+            text: pgQuestions.length > 0 ? 'II. URAIAN / ESSAY' : 'NASKAH SOAL URAIAN',
             bold: true,
             font: 'Times New Roman',
             size: 22,
@@ -295,14 +322,14 @@ export async function exportExamToDocx(exam: ExamData) {
     );
 
     essayQuestions.forEach((q) => {
-      if (q.stimulus) {
+      if (q.stimulus && typeof q.stimulus === 'string' && q.stimulus.trim()) {
         children.push(
           new Paragraph({
             indent: { left: 360 },
             spacing: { before: 100, after: 60 },
             children: [
               new TextRun({
-                text: q.stimulus,
+                text: safeStr(q.stimulus),
                 italics: true,
                 font: 'Times New Roman',
                 size: 20,
@@ -317,13 +344,13 @@ export async function exportExamToDocx(exam: ExamData) {
           spacing: { before: 100, after: 100 },
           children: [
             new TextRun({
-              text: `${q.number}. `,
+              text: `${safeStr(q.number)}. `,
               bold: true,
               font: 'Times New Roman',
               size: 21,
             }),
             new TextRun({
-              text: q.question,
+              text: safeStr(q.question),
               font: 'Times New Roman',
               size: 21,
             }),
@@ -352,26 +379,26 @@ export async function exportExamToDocx(exam: ExamData) {
     })
   );
 
-  exam.questions.forEach((q) => {
+  questions.forEach((q) => {
     children.push(
       new Paragraph({
         spacing: { before: 120, after: 60 },
         children: [
           new TextRun({
-            text: `Soal No. ${q.number} (${q.type.toUpperCase()}) - Kunci: `,
+            text: `Soal No. ${safeStr(q.number)} (${safeStr(q.type || 'PG').toUpperCase()}) - Kunci: `,
             bold: true,
             font: 'Times New Roman',
             size: 21,
           }),
           new TextRun({
-            text: q.correctAnswer,
+            text: safeStr(q.correctAnswer, '-'),
             bold: true,
             color: '006600',
             font: 'Times New Roman',
             size: 21,
           }),
           new TextRun({
-            text: `  [Level: ${q.cognitiveLevel}]`,
+            text: `  [Level: ${safeStr(q.cognitiveLevel, 'C3')}]`,
             italics: true,
             font: 'Times New Roman',
             size: 19,
@@ -383,14 +410,14 @@ export async function exportExamToDocx(exam: ExamData) {
         spacing: { after: 120 },
         children: [
           new TextRun({
-            text: `Pembahasan: `,
+            text: 'Pembahasan: ',
             bold: true,
             italics: true,
             font: 'Times New Roman',
             size: 20,
           }),
           new TextRun({
-            text: q.explanation,
+            text: safeStr(q.explanation, '-'),
             font: 'Times New Roman',
             size: 20,
           }),
@@ -445,24 +472,62 @@ export async function exportExamToDocx(exam: ExamData) {
 
   const kisiRows = [kisiHeaderRow];
 
-  exam.questions.forEach((q, idx) => {
+  questions.forEach((q, idx) => {
     kisiRows.push(
       new TableRow({
         children: [
           new TableCell({
-            children: [new Paragraph({ alignment: AlignmentType.CENTER, children: [new TextRun({ text: String(idx + 1), font: 'Times New Roman' })] })],
+            children: [
+              new Paragraph({
+                alignment: AlignmentType.CENTER,
+                children: [new TextRun({ text: String(idx + 1), font: 'Times New Roman' })],
+              }),
+            ],
           }),
           new TableCell({
-            children: [new Paragraph({ children: [new TextRun({ text: q.learningObjective || exam.topic, font: 'Times New Roman' })] })],
+            children: [
+              new Paragraph({
+                children: [
+                  new TextRun({
+                    text: safeStr(q.learningObjective, safeStr(exam.topic, '-')),
+                    font: 'Times New Roman',
+                  }),
+                ],
+              }),
+            ],
           }),
           new TableCell({
-            children: [new Paragraph({ children: [new TextRun({ text: q.indicator || `Menjawab soal materi ${exam.topic}`, font: 'Times New Roman' })] })],
+            children: [
+              new Paragraph({
+                children: [
+                  new TextRun({
+                    text: safeStr(q.indicator, `Menjawab soal materi ${safeStr(exam.topic, '')}`),
+                    font: 'Times New Roman',
+                  }),
+                ],
+              }),
+            ],
           }),
           new TableCell({
-            children: [new Paragraph({ alignment: AlignmentType.CENTER, children: [new TextRun({ text: String(q.cognitiveLevel), font: 'Times New Roman' })] })],
+            children: [
+              new Paragraph({
+                alignment: AlignmentType.CENTER,
+                children: [new TextRun({ text: safeStr(q.cognitiveLevel, 'C3'), font: 'Times New Roman' })],
+              }),
+            ],
           }),
           new TableCell({
-            children: [new Paragraph({ alignment: AlignmentType.CENTER, children: [new TextRun({ text: `${q.type.toUpperCase()} (No. ${q.number})`, font: 'Times New Roman' })] })],
+            children: [
+              new Paragraph({
+                alignment: AlignmentType.CENTER,
+                children: [
+                  new TextRun({
+                    text: `${safeStr(q.type || 'PG').toUpperCase()} (No. ${safeStr(q.number)})`,
+                    font: 'Times New Roman',
+                  }),
+                ],
+              }),
+            ],
           }),
         ],
       })
@@ -475,6 +540,79 @@ export async function exportExamToDocx(exam: ExamData) {
   });
 
   children.push(kisiTable);
+
+  // ================= 8. LAMPIRAN: RUBRIK PENILAIAN (JIKA ADA) =================
+  if (Array.isArray(exam.rubrics) && exam.rubrics.length > 0) {
+    children.push(
+      new Paragraph({
+        children: [new PageBreak()],
+      }),
+      new Paragraph({
+        alignment: AlignmentType.CENTER,
+        spacing: { after: 150 },
+        children: [
+          new TextRun({
+            text: 'PEDOMAN PENSKORAN & RUBRIK PENILAIAN URAIAN',
+            bold: true,
+            size: 26,
+            font: 'Times New Roman',
+          }),
+        ],
+      })
+    );
+
+    exam.rubrics.forEach((rubric) => {
+      children.push(
+        new Paragraph({
+          spacing: { before: 120, after: 60 },
+          children: [
+            new TextRun({
+              text: `Soal Uraian Nomor ${safeStr(rubric.questionNumber)} (Skor Maksimal: ${safeStr(rubric.maxScore, '10')})`,
+              bold: true,
+              font: 'Times New Roman',
+              size: 21,
+            }),
+          ],
+        }),
+        new Paragraph({
+          indent: { left: 240 },
+          spacing: { after: 60 },
+          children: [
+            new TextRun({
+              text: `Kriteria: ${safeStr(rubric.criteria)}`,
+              italics: true,
+              font: 'Times New Roman',
+              size: 20,
+            }),
+          ],
+        })
+      );
+
+      if (Array.isArray(rubric.scoringGuide)) {
+        rubric.scoringGuide.forEach((sg) => {
+          children.push(
+            new Paragraph({
+              indent: { left: 480 },
+              spacing: { after: 40 },
+              children: [
+                new TextRun({
+                  text: `• Skor ${safeStr(sg.score)}: `,
+                  bold: true,
+                  font: 'Times New Roman',
+                  size: 20,
+                }),
+                new TextRun({
+                  text: safeStr(sg.description),
+                  font: 'Times New Roman',
+                  size: 20,
+                }),
+              ],
+            })
+          );
+        });
+      }
+    });
+  }
 
   // Buat Dokumen Docx
   const doc = new Document({
@@ -496,9 +634,11 @@ export async function exportExamToDocx(exam: ExamData) {
   });
 
   const blob = await Packer.toBlob(doc);
-  const cleanSubject = exam.subject.replace(/[^a-zA-Z0-9]/g, '_');
-  const cleanGrade = exam.grade.replace(/[^a-zA-Z0-9]/g, '_');
-  const fileName = `Soal_${cleanSubject}_${cleanGrade}_${exam.academicYear.replace('/', '-')}.docx`;
+  const cleanSubject = safeStr(exam.subject, 'Mapel').replace(/[^a-zA-Z0-9]/g, '_');
+  const cleanGrade = safeStr(exam.grade, 'Kelas').replace(/[^a-zA-Z0-9]/g, '_');
+  const cleanYear = safeStr(exam.academicYear, '2024-2025').replace(/[^a-zA-Z0-9]/g, '-');
+  const fileName = `Soal_${cleanSubject}_${cleanGrade}_${cleanYear}.docx`;
 
   saveAs(blob, fileName);
 }
+

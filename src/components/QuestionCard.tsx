@@ -1,4 +1,4 @@
-﻿'use client';
+'use client';
 
 import React, { useState } from 'react';
 import { QuestionItem } from '@/types/exam';
@@ -113,10 +113,12 @@ export const QuestionCard: React.FC<QuestionCardProps> = ({
       </div>
 
       {/* Pilihan Ganda (Opsi) */}
-      {question.type === 'pg' && question.options && (
+      {question.type === 'pg' && Array.isArray(question.options) && (
         <div className="grid grid-cols-1 gap-2 pt-1">
           {question.options.map((opt) => {
-            const isCorrect = question.correctAnswer.toUpperCase() === opt.key.toUpperCase();
+            const isCorrect =
+              String(question.correctAnswer || '').trim().toUpperCase() ===
+              String(opt.key || '').trim().toUpperCase();
             return (
               <div
                 key={opt.key}
@@ -154,7 +156,7 @@ export const QuestionCard: React.FC<QuestionCardProps> = ({
           </div>
 
           <div className="font-medium text-emerald-800 bg-emerald-50 px-2.5 py-1 rounded-lg border border-emerald-200/70 inline-block">
-            Kunci: {question.correctAnswer}
+            Kunci: {String(question.correctAnswer || '-')}
           </div>
 
           {isEditing ? (
@@ -165,7 +167,7 @@ export const QuestionCard: React.FC<QuestionCardProps> = ({
               className="w-full text-xs p-2 rounded-lg border border-slate-300 focus:outline-none focus:ring-1 focus:ring-blue-500"
             />
           ) : (
-            <p className="text-slate-600 leading-relaxed pl-1">{question.explanation}</p>
+            <p className="text-slate-600 leading-relaxed pl-1">{question.explanation || '-'}</p>
           )}
 
           {/* Indikator Kisi-kisi */}

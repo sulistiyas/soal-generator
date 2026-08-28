@@ -60,7 +60,7 @@ export interface ExamData {
   rubrics?: RubricItem[];
 }
 
-export type AIProviderId = 'gemini' | 'groq' | 'openrouter' | 'ollama' | 'deepseek' | 'openai';
+export type AIProviderId = 'gemini' | 'groq' | 'openrouter' | 'ollama' | 'deepseek' | 'openai' | 'anthropic';
 
 export interface AIModelOption {
   id: string;
