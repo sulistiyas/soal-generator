@@ -16,6 +16,10 @@ import {
   AI_PROVIDERS,
 } from '@/lib/constants';
 import {
+  getTopicSuggestions,
+  getSubMaterialSuggestions,
+} from '@/lib/subject-topics';
+import {
   Sparkles,
   BookOpen,
   Clock,
@@ -28,6 +32,8 @@ import {
   Bot,
   Settings2,
   AlertCircle,
+  Layers,
+  ListTree,
 } from 'lucide-react';
 
 interface ExamFormProps {
@@ -52,13 +58,47 @@ export const ExamForm: React.FC<ExamFormProps> = ({
   const [semester, setSemester] = useState('1 (Ganjil)');
   const [academicYear, setAcademicYear] = useState('2025/2026');
   const [durationMinutes, setDurationMinutes] = useState(90);
-  const [topic, setTopic] = useState('Hakikat Ilmu Sains dan Metode Ilmiah');
-  const [specificMaterial, setSpecificMaterial] = useState('');
+
+  // Dynamic Topic & Sub-Material State
+  const initialTopic = 'Hakikat Ilmu Sains dan Metode Ilmiah';
+  const initialSubList = getSubMaterialSuggestions('Ilmu Pengetahuan Alam (IPA)', initialTopic);
+  const initialSub = initialSubList[0] || '';
+
+  const [topic, setTopic] = useState(initialTopic);
+  const [selectedTopicPreset, setSelectedTopicPreset] = useState(initialTopic);
+  const [specificMaterial, setSpecificMaterial] = useState(initialSub);
+  const [selectedSubPreset, setSelectedSubPreset] = useState(initialSub);
+
   const [pgCount, setPgCount] = useState(10);
   const [essayCount, setEssayCount] = useState(3);
   const [difficulty, setDifficulty] = useState<'seimbang' | 'hots' | 'mudah'>('seimbang');
   const [additionalInstructions] = useState('');
 
+  // Handle change of Subject (Mapel)
+  const handleSubjectChange = (newSubject: string) => {
+    setSubject(newSubject);
+    const suggestedTopics = getTopicSuggestions(newSubject);
+    if (suggestedTopics && suggestedTopics.length > 0) {
+      const firstTopic = suggestedTopics[0].topic;
+      setSelectedTopicPreset(firstTopic);
+      setTopic(firstTopic);
+
+      const subList = getSubMaterialSuggestions(newSubject, firstTopic);
+      if (subList && subList.length > 0) {
+        setSelectedSubPreset(subList[0]);
+        setSpecificMaterial(subList[0]);
+      } else {
+        setSelectedSubPreset('');
+        setSpecificMaterial('');
+      }
+    } else {
+      setSelectedTopicPreset('__custom__');
+      setSelectedSubPreset('');
+      setSpecificMaterial('');
+    }
+  };
+
+  // Handle change of Level (Jenjang)
   const handleLevelChange = (newLevel: EducationLevel) => {
     setLevel(newLevel);
     const currentLevel = EDUCATION_LEVELS[newLevel];
@@ -68,8 +108,49 @@ export const ExamForm: React.FC<ExamFormProps> = ({
         setGrade(`${firstGrade.name} (${firstGrade.phase || ''})`.trim());
       }
       if (currentLevel.subjects.length > 0) {
-        setSubject(currentLevel.subjects[0]);
+        const firstSub = currentLevel.subjects[0];
+        handleSubjectChange(firstSub);
       }
+    }
+  };
+
+  // Handle change of Topic Preset dropdown
+  const handleTopicPresetChange = (val: string) => {
+    setSelectedTopicPreset(val);
+    if (val !== '__custom__') {
+      setTopic(val);
+      const subList = getSubMaterialSuggestions(subject, val);
+      if (subList && subList.length > 0) {
+        setSelectedSubPreset(subList[0]);
+        setSpecificMaterial(subList[0]);
+      } else {
+        setSelectedSubPreset('');
+        setSpecificMaterial('');
+      }
+    }
+  };
+
+  // Handle manual input of Topic
+  const handleTopicInputChange = (val: string) => {
+    setTopic(val);
+    const currentSuggestions = getTopicSuggestions(subject);
+    const matched = currentSuggestions.find(
+      (t) => t.topic.toLowerCase() === val.trim().toLowerCase()
+    );
+    if (matched) {
+      setSelectedTopicPreset(matched.topic);
+    } else {
+      setSelectedTopicPreset('__custom__');
+    }
+  };
+
+  // Handle change of Sub-Material Preset dropdown
+  const handleSubPresetChange = (val: string) => {
+    setSelectedSubPreset(val);
+    if (val === '__empty__') {
+      setSpecificMaterial('');
+    } else if (val !== '__custom__') {
+      setSpecificMaterial(val);
     }
   };
 
@@ -139,6 +220,8 @@ export const ExamForm: React.FC<ExamFormProps> = ({
   };
 
   const levelInfo = EDUCATION_LEVELS[level];
+  const topicSuggestions = getTopicSuggestions(subject);
+  const subMaterialSuggestions = getSubMaterialSuggestions(subject, topic);
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
@@ -285,12 +368,13 @@ export const ExamForm: React.FC<ExamFormProps> = ({
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {/* Mata Pelajaran */}
           <div>
-            <label className="block text-xs font-semibold text-slate-700 mb-1.5">
-              Mata Pelajaran
+            <label className="block text-xs font-semibold text-slate-700 mb-1.5 flex items-center justify-between">
+              <span>Mata Pelajaran</span>
+              <span className="text-[10px] text-blue-600 font-normal">Mengubah pilihan bab & sub-materi</span>
             </label>
             <select
               value={subject}
-              onChange={(e) => setSubject(e.target.value)}
+              onChange={(e) => handleSubjectChange(e.target.value)}
               className="w-full text-sm px-3.5 py-2 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 bg-white"
             >
               {levelInfo.subjects.map((sub) => (
@@ -319,36 +403,94 @@ export const ExamForm: React.FC<ExamFormProps> = ({
           </div>
         </div>
 
-        {/* Topik Utama */}
-        <div>
-          <label className="block text-xs font-semibold text-slate-700 mb-1.5">
-            Topik Utama / Bab / Capaian Pembelajaran <span className="text-red-500">*</span>
-          </label>
+        {/* Topik Utama / Bab */}
+        <div className="space-y-2">
+          <div className="flex items-center justify-between">
+            <label className="block text-xs font-semibold text-slate-700">
+              Topik Utama / Bab / Capaian Pembelajaran <span className="text-red-500">*</span>
+            </label>
+            <span className="text-[11px] text-blue-600 font-medium flex items-center gap-1">
+              <Layers className="w-3.5 h-3.5" /> Bab Sesuai Mapel: {subject.split('(')[0].trim()}
+            </span>
+          </div>
+
+          {/* Dropdown Pilihan Bab Sesuai Mapel */}
+          <select
+            value={selectedTopicPreset}
+            onChange={(e) => handleTopicPresetChange(e.target.value)}
+            className="w-full text-sm px-3.5 py-2.5 rounded-xl border border-blue-200 bg-blue-50/50 text-slate-800 font-medium focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all cursor-pointer"
+          >
+            <optgroup label={`📚 Contoh Bab Terpilih (${subject})`}>
+              {topicSuggestions.map((item, idx) => (
+                <option key={idx} value={item.topic}>
+                  {idx + 1}. {item.topic}
+                </option>
+              ))}
+            </optgroup>
+            <optgroup label="⚙️ Opsi Lainnya">
+              <option value="__custom__">✏️ Tulis Topik Kustom / Input Manual...</option>
+            </optgroup>
+          </select>
+
+          {/* Kolom Input Edit Topik */}
           <input
             type="text"
             value={topic}
-            onChange={(e) => setTopic(e.target.value)}
-            placeholder="Contoh: Ekosistem dan Rantai Makanan, Bangun Ruang Sisi Lengkung, Teks Laporan Hasil Observasi"
-            className="w-full text-sm px-3.5 py-2 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
+            onChange={(e) => handleTopicInputChange(e.target.value)}
+            placeholder="Tuliskan judul bab atau konsep kunci yang ingin diujikan..."
+            className="w-full text-sm px-3.5 py-2 rounded-xl border border-slate-300 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 text-slate-800"
             required
           />
-          <p className="mt-1 text-[11px] text-slate-500">
-            Tuliskan judul bab atau konsep kunci yang ingin diujikan.
+          <p className="text-[11px] text-slate-500">
+            Pilih bab dari dropdown di atas atau ketik/edit judul bab secara bebas di kolom teks.
           </p>
         </div>
 
         {/* Materi Tambahan */}
-        <div>
-          <label className="block text-xs font-semibold text-slate-700 mb-1.5">
-            Rincian Sub-Materi / Konteks Khusus (Opsional)
-          </label>
+        <div className="space-y-2">
+          <div className="flex items-center justify-between">
+            <label className="block text-xs font-semibold text-slate-700">
+              Rincian Sub-Materi / Konteks Khusus (Opsional)
+            </label>
+            <span className="text-[11px] text-emerald-600 font-medium flex items-center gap-1">
+              <ListTree className="w-3.5 h-3.5" /> Rekomendasi Sub-Materi
+            </span>
+          </div>
+
+          {/* Dropdown Pilihan Sub-Materi Sesuai Bab */}
+          <select
+            value={selectedSubPreset}
+            onChange={(e) => handleSubPresetChange(e.target.value)}
+            className="w-full text-sm px-3.5 py-2.5 rounded-xl border border-emerald-200 bg-emerald-50/50 text-slate-800 font-medium focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all cursor-pointer"
+          >
+            <option value="">-- Pilih Contoh Rincian Sub-Materi / Fokus --</option>
+            <optgroup label="🎯 Rekomendasi Sub-Materi Terkait">
+              {subMaterialSuggestions.map((sub, idx) => (
+                <option key={idx} value={sub}>
+                  {idx + 1}. {sub}
+                </option>
+              ))}
+            </optgroup>
+            <optgroup label="⚙️ Opsi Lainnya">
+              <option value="__empty__">❌ Kosongkan (Biarkan AI menyusun merata)</option>
+              <option value="__custom__">✏️ Tulis Rincian Kustom / Catatan Sendiri</option>
+            </optgroup>
+          </select>
+
+          {/* Textarea untuk Edit Rincian Sub-Materi */}
           <textarea
             value={specificMaterial}
-            onChange={(e) => setSpecificMaterial(e.target.value)}
-            placeholder="Contoh: Fokuskan pada simbiosis parasitisme, piramida makanan, serta studi kasus pencemaran sungai..."
+            onChange={(e) => {
+              setSpecificMaterial(e.target.value);
+              setSelectedSubPreset('__custom__');
+            }}
+            placeholder="Contoh: Fokuskan pada metode ilmiah, variabel penelitian, dan pengukuran..."
             rows={2}
-            className="w-full text-sm px-3.5 py-2 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
+            className="w-full text-sm px-3.5 py-2 rounded-xl border border-slate-300 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 text-slate-800"
           />
+          <p className="text-[11px] text-slate-500">
+            Pilih dari opsi dropdown atau sesuaikan rincian cakupan materi dan konteks khusus di atas.
+          </p>
         </div>
       </div>
 
