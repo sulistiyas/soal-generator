@@ -130,26 +130,14 @@ export const ExamForm: React.FC<ExamFormProps> = ({
     }
   };
 
-  // Handle manual input of Topic
-  const handleTopicInputChange = (val: string) => {
-    setTopic(val);
-    const currentSuggestions = getTopicSuggestions(subject);
-    const matched = currentSuggestions.find(
-      (t) => t.topic.toLowerCase() === val.trim().toLowerCase()
-    );
-    if (matched) {
-      setSelectedTopicPreset(matched.topic);
-    } else {
-      setSelectedTopicPreset('__custom__');
-    }
-  };
-
   // Handle change of Sub-Material Preset dropdown
   const handleSubPresetChange = (val: string) => {
     setSelectedSubPreset(val);
-    if (val === '__empty__') {
+    if (val === '__empty__' || val === '') {
       setSpecificMaterial('');
-    } else if (val !== '__custom__') {
+    } else if (val === '__custom__') {
+      // Switched to manual input
+    } else {
       setSpecificMaterial(val);
     }
   };
@@ -428,22 +416,31 @@ export const ExamForm: React.FC<ExamFormProps> = ({
               ))}
             </optgroup>
             <optgroup label="⚙️ Opsi Lainnya">
-              <option value="__custom__">✏️ Tulis Topik Kustom / Input Manual...</option>
+              <option value="__custom__">✏️ Tulis Manual / Bab Kustom...</option>
             </optgroup>
           </select>
 
-          {/* Kolom Input Edit Topik */}
-          <input
-            type="text"
-            value={topic}
-            onChange={(e) => handleTopicInputChange(e.target.value)}
-            placeholder="Tuliskan judul bab atau konsep kunci yang ingin diujikan..."
-            className="w-full text-sm px-3.5 py-2 rounded-xl border border-slate-300 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 text-slate-800"
-            required
-          />
-          <p className="text-[11px] text-slate-500">
-            Pilih bab dari dropdown di atas atau ketik/edit judul bab secara bebas di kolom teks.
-          </p>
+          {/* Kolom Input Edit Topik (Hanya muncul jika memilih Tulis Manual) */}
+          {selectedTopicPreset === '__custom__' ? (
+            <div className="space-y-1.5 pt-1 animate-in fade-in slide-in-from-top-1 duration-150">
+              <input
+                type="text"
+                value={topic}
+                onChange={(e) => setTopic(e.target.value)}
+                placeholder="Tuliskan judul bab atau konsep kunci yang ingin diujikan..."
+                className="w-full text-sm px-3.5 py-2.5 rounded-xl border border-blue-300 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 text-slate-800 shadow-2xs"
+                required
+                autoFocus
+              />
+              <p className="text-[11px] text-slate-500">
+                Ketik nama bab atau konsep materi yang ingin dibuatkan soal secara spesifik.
+              </p>
+            </div>
+          ) : (
+            <p className="text-[11px] text-slate-500">
+              Pilih bab dari daftar rekomendasi di atas, atau pilih opsi <strong>&quot;Tulis Manual&quot;</strong> jika ingin mengetik judul bab sendiri.
+            </p>
+          )}
         </div>
 
         {/* Materi Tambahan */}
@@ -463,34 +460,42 @@ export const ExamForm: React.FC<ExamFormProps> = ({
             onChange={(e) => handleSubPresetChange(e.target.value)}
             className="w-full text-sm px-3.5 py-2.5 rounded-xl border border-emerald-200 bg-emerald-50/50 text-slate-800 font-medium focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all cursor-pointer"
           >
-            <option value="">-- Pilih Contoh Rincian Sub-Materi / Fokus --</option>
-            <optgroup label="🎯 Rekomendasi Sub-Materi Terkait">
-              {subMaterialSuggestions.map((sub, idx) => (
-                <option key={idx} value={sub}>
-                  {idx + 1}. {sub}
-                </option>
-              ))}
-            </optgroup>
+            <option value="">-- Pilih Rincian Sub-Materi / Fokus --</option>
+            {subMaterialSuggestions.length > 0 && (
+              <optgroup label="🎯 Rekomendasi Sub-Materi Terkait">
+                {subMaterialSuggestions.map((sub, idx) => (
+                  <option key={idx} value={sub}>
+                    {idx + 1}. {sub}
+                  </option>
+                ))}
+              </optgroup>
+            )}
             <optgroup label="⚙️ Opsi Lainnya">
               <option value="__empty__">❌ Kosongkan (Biarkan AI menyusun merata)</option>
-              <option value="__custom__">✏️ Tulis Rincian Kustom / Catatan Sendiri</option>
+              <option value="__custom__">✏️ Tulis Manual / Rincian Kustom...</option>
             </optgroup>
           </select>
 
-          {/* Textarea untuk Edit Rincian Sub-Materi */}
-          <textarea
-            value={specificMaterial}
-            onChange={(e) => {
-              setSpecificMaterial(e.target.value);
-              setSelectedSubPreset('__custom__');
-            }}
-            placeholder="Contoh: Fokuskan pada metode ilmiah, variabel penelitian, dan pengukuran..."
-            rows={2}
-            className="w-full text-sm px-3.5 py-2 rounded-xl border border-slate-300 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 text-slate-800"
-          />
-          <p className="text-[11px] text-slate-500">
-            Pilih dari opsi dropdown atau sesuaikan rincian cakupan materi dan konteks khusus di atas.
-          </p>
+          {/* Textarea untuk Edit Rincian Sub-Materi (Hanya muncul jika memilih Tulis Manual) */}
+          {selectedSubPreset === '__custom__' ? (
+            <div className="space-y-1.5 pt-1 animate-in fade-in slide-in-from-top-1 duration-150">
+              <textarea
+                value={specificMaterial}
+                onChange={(e) => setSpecificMaterial(e.target.value)}
+                placeholder="Contoh: Fokuskan pada metode ilmiah, variabel penelitian, dan pengukuran..."
+                rows={2}
+                className="w-full text-sm px-3.5 py-2.5 rounded-xl border border-emerald-300 bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 text-slate-800 shadow-2xs"
+                autoFocus
+              />
+              <p className="text-[11px] text-slate-500">
+                Tuliskan fokus materi khusus, batasan cakupan, atau instruksi materi tambahan secara bebas.
+              </p>
+            </div>
+          ) : (
+            <p className="text-[11px] text-slate-500">
+              Pilih dari rekomendasi sub-materi di atas, atau pilih opsi <strong>&quot;Tulis Manual&quot;</strong> untuk kustomisasi rincian.
+            </p>
+          )}
         </div>
       </div>
 

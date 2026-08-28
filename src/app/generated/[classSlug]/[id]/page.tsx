@@ -59,8 +59,13 @@ function parseStoredSettings(rawJson: string): UserAISettings {
       const availableModelIds = prov.availableModels.map((m) => m.id);
       let model = savedProv?.model || prov.defaultModel;
 
-      if (!availableModelIds.includes(model) && model !== 'custom' && !model.includes(':')) {
-        model = prov.defaultModel;
+      // If the cached model is invalid or legacy, migrate to the latest default model
+      if (!availableModelIds.includes(model) && model !== 'custom') {
+        if (prov.id === 'openrouter' && model.startsWith('google/gemini-')) {
+          model = prov.defaultModel;
+        } else if (prov.id !== 'ollama' && !model.includes(':')) {
+          model = prov.defaultModel;
+        }
       }
 
       mergedProviders[prov.id] = {
