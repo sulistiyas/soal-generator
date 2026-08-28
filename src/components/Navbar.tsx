@@ -1,14 +1,39 @@
-﻿'use client';
+'use client';
 
 import React from 'react';
-import { BookOpen, Sparkles, Key, ExternalLink } from 'lucide-react';
+import { BookOpen, Sparkles, Key, Zap, Globe, HardDrive, Cpu, Bot, Settings2 } from 'lucide-react';
+import { AI_PROVIDERS } from '@/lib/constants';
+import { AIProviderId, UserAISettings } from '@/types/exam';
 
 interface NavbarProps {
-  hasApiKey: boolean;
+  aiSettings: UserAISettings;
   onOpenApiKeyModal: () => void;
 }
 
-export const Navbar: React.FC<NavbarProps> = ({ hasApiKey, onOpenApiKeyModal }) => {
+export const Navbar: React.FC<NavbarProps> = ({ aiSettings, onOpenApiKeyModal }) => {
+  const activeProviderId: AIProviderId = aiSettings?.activeProvider || 'gemini';
+  const activeConfig = AI_PROVIDERS.find((p) => p.id === activeProviderId) || AI_PROVIDERS[0];
+  const activeSetting = aiSettings?.providers?.[activeProviderId];
+  
+  const isConnected = !activeConfig.requiresApiKey || !!activeSetting?.apiKey;
+
+  const getProviderIcon = (id: AIProviderId) => {
+    switch (id) {
+      case 'gemini':
+        return <Sparkles className="w-3.5 h-3.5 text-blue-500" />;
+      case 'groq':
+        return <Zap className="w-3.5 h-3.5 text-amber-500" />;
+      case 'openrouter':
+        return <Globe className="w-3.5 h-3.5 text-purple-500" />;
+      case 'ollama':
+        return <HardDrive className="w-3.5 h-3.5 text-emerald-500" />;
+      case 'deepseek':
+        return <Cpu className="w-3.5 h-3.5 text-cyan-500" />;
+      case 'openai':
+        return <Bot className="w-3.5 h-3.5 text-emerald-600" />;
+    }
+  };
+
   return (
     <header className="sticky top-0 z-40 w-full border-b border-slate-200 bg-white/95 backdrop-blur shadow-xs print:hidden">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
@@ -26,7 +51,7 @@ export const Navbar: React.FC<NavbarProps> = ({ hasApiKey, onOpenApiKeyModal }) 
               </span>
             </div>
             <p className="text-xs text-slate-500 hidden sm:block">
-              Generator Soal Ujian, Kisi-Kisi, & Kunci Jawaban Berbasis AI
+              Generator Soal Ujian, Kisi-Kisi, & Kunci Jawaban Berbasis Multi-AI
             </p>
           </div>
         </div>
@@ -36,28 +61,21 @@ export const Navbar: React.FC<NavbarProps> = ({ hasApiKey, onOpenApiKeyModal }) 
           <button
             type="button"
             onClick={onOpenApiKeyModal}
-            className={`inline-flex items-center gap-2 px-3.5 py-1.5 rounded-lg text-xs font-medium transition-all border ${
-              hasApiKey
-                ? 'bg-emerald-50 text-emerald-700 border-emerald-200 hover:bg-emerald-100'
-                : 'bg-amber-50 text-amber-800 border-amber-300 hover:bg-amber-100 animate-pulse'
+            className={`inline-flex items-center gap-2 px-3.5 py-1.5 rounded-xl text-xs font-semibold transition-all border cursor-pointer ${
+              isConnected
+                ? 'bg-slate-50 text-slate-800 border-slate-200 hover:bg-slate-100 hover:border-slate-300 shadow-2xs'
+                : 'bg-amber-50 text-amber-900 border-amber-300 hover:bg-amber-100 animate-pulse'
             }`}
           >
-            <Key className="w-3.5 h-3.5" />
-            <span>{hasApiKey ? 'Gemini API: Terhubung' : 'Atur API Key Gemini'}</span>
+            {getProviderIcon(activeConfig.id)}
+            <span className="max-w-[150px] sm:max-w-none truncate">
+              {activeConfig.name} {isConnected ? `(${activeConfig.tierBadge.split(' ')[0]})` : ': Belum Terhubung'}
+            </span>
             <span
-              className={`w-2 h-2 rounded-full ${hasApiKey ? 'bg-emerald-500' : 'bg-amber-500'}`}
+              className={`w-2 h-2 rounded-full shrink-0 ${isConnected ? 'bg-emerald-500' : 'bg-amber-500'}`}
             />
+            <Settings2 className="w-3 h-3 text-slate-400 ml-0.5" />
           </button>
-
-          <a
-            href="https://aistudio.google.com/app/apikey"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="hidden md:inline-flex items-center gap-1 text-xs text-slate-500 hover:text-slate-800 px-2 py-1"
-          >
-            <span>Dapatkan API Key Gratis</span>
-            <ExternalLink className="w-3 h-3" />
-          </a>
         </div>
       </div>
     </header>

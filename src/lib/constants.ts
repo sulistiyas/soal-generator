@@ -1,4 +1,4 @@
-﻿import { EducationLevel, CurriculumType, ExamCategory } from '@/types/exam';
+import { EducationLevel, CurriculumType, ExamCategory } from '@/types/exam';
 
 export interface LevelInfo {
   id: EducationLevel;
@@ -136,3 +136,191 @@ export const CURRICULA: { id: CurriculumType; label: string }[] = [
   { id: 'merdeka', label: 'Kurikulum Merdeka (Capaian & Tujuan Pembelajaran)' },
   { id: 'k13', label: 'Kurikulum 2013 / K-13 (Kompetensi Dasar)' },
 ];
+
+import { AIProviderConfig, UserAISettings } from '@/types/exam';
+
+export const AI_PROVIDERS: AIProviderConfig[] = [
+  {
+    id: 'gemini',
+    name: 'Google Gemini',
+    tagline: 'Pilihan Utama Guru Indonesia - Gratis & Cerdas',
+    tierBadge: '🟢 Gratis (Rekomendasi)',
+    tierType: 'free',
+    description: 'Gratis 100% menggunakan akun Google / Gmail via Google AI Studio (hingga 15 request/menit).',
+    defaultModel: 'gemini-2.5-flash',
+    availableModels: [
+      { id: 'gemini-2.5-flash', name: 'Gemini 2.5 Flash', badge: 'Rekomendasi', description: 'Model terbaru Google yang cepat, cerdas, dan efisien' },
+      { id: 'gemini-1.5-flash', name: 'Gemini 1.5 Flash', badge: 'Sangat Cepat', description: 'Generasi kilat untuk pembuatan soal standar' },
+      { id: 'gemini-1.5-pro', name: 'Gemini 1.5 Pro', badge: 'Penalaran Kompleks', description: 'Cocok untuk soal analitis HOTS tingkat tinggi' },
+    ],
+    requiresApiKey: true,
+    apiKeyPlaceholder: 'AIzaSy...',
+    apiKeyHelpTitle: 'Cara Mendapatkan Gemini API Key Gratis:',
+    apiKeyHelpUrl: 'https://aistudio.google.com/app/apikey',
+    apiKeyHelpSteps: [
+      'Buka Google AI Studio (aistudio.google.com/app/apikey)',
+      'Login dengan akun Google/Gmail Anda',
+      'Klik tombol "Create API Key"',
+      'Salin dan tempelkan key di form ini',
+    ],
+  },
+  {
+    id: 'groq',
+    name: 'Groq Cloud',
+    tagline: 'Generasi Super Kilat (300+ Token/Detik)',
+    tierBadge: '⚡ Gratis (Super Cepat)',
+    tierType: 'free',
+    description: 'Layanan inferensi AI tercepat di dunia dengan kuota gratis harian besar. Menjalankan model Llama 3.3 70B.',
+    defaultModel: 'llama-3.3-70b-versatile',
+    availableModels: [
+      { id: 'llama-3.3-70b-versatile', name: 'Meta Llama 3.3 70B', badge: 'Rekomendasi', description: 'Sangat cerdas, pemahaman bahasa sangat baik dan akurat' },
+      { id: 'deepseek-r1-distill-llama-70b', name: 'DeepSeek R1 Distill 70B', badge: 'Penalaran / HOTS', description: 'Model reasoning kuat untuk soal eksak dan logika' },
+      { id: 'llama-3.1-8b-instant', name: 'Meta Llama 3.1 8B', badge: 'Kilat', description: 'Generasi instan dalam hitungan detik' },
+    ],
+    requiresApiKey: true,
+    apiKeyPlaceholder: 'gsk_...',
+    apiKeyHelpTitle: 'Cara Mendapatkan Groq API Key Gratis:',
+    apiKeyHelpUrl: 'https://console.groq.com/keys',
+    apiKeyHelpSteps: [
+      'Buka Groq Console (console.groq.com/keys)',
+      'Daftar / Login dengan akun Google atau GitHub',
+      'Klik menu "API Keys" lalu klik "Create API Key"',
+      'Beri nama lalu salin key yang diawali gsk_...',
+    ],
+    defaultBaseUrl: 'https://api.groq.com/openai/v1',
+  },
+  {
+    id: 'openrouter',
+    name: 'OpenRouter',
+    tagline: 'Akses Banyak Model AI Gratis dengan 1 API Key',
+    tierBadge: '🌐 Gratis Multi-Model',
+    tierType: 'freemium',
+    description: 'Hub model AI internasional. Menyediakan banyak pilihan model bertanda ":free" tanpa perlu kartu kredit.',
+    defaultModel: 'google/gemini-2.0-flash-exp:free',
+    availableModels: [
+      { id: 'google/gemini-2.0-flash-exp:free', name: 'Gemini 2.0 Flash (Free)', badge: 'Gratis', description: 'Model eksperimental gratis dari Google' },
+      { id: 'meta-llama/llama-3.3-70b-instruct:free', name: 'Llama 3.3 70B (Free)', badge: 'Gratis', description: 'Model open-source tercerdas dari Meta' },
+      { id: 'deepseek/deepseek-r1:free', name: 'DeepSeek R1 (Free)', badge: 'Gratis / HOTS', description: 'Model penalaran mendalam gratis' },
+      { id: 'qwen/qwen-2.5-72b-instruct:free', name: 'Qwen 2.5 72B (Free)', badge: 'Gratis', description: 'Model multibahasa sangat bagus' },
+    ],
+    requiresApiKey: true,
+    apiKeyPlaceholder: 'sk-or-v1-...',
+    apiKeyHelpTitle: 'Cara Mendapatkan OpenRouter API Key Gratis:',
+    apiKeyHelpUrl: 'https://openrouter.ai/keys',
+    apiKeyHelpSteps: [
+      'Buka OpenRouter (openrouter.ai/keys)',
+      'Login / Sign Up akun baru',
+      'Klik "Create Key", beri nama dan biarkan credit limit kosong/default',
+      'Salin key dan gunakan untuk model-model gratis (:free)',
+    ],
+    defaultBaseUrl: 'https://openrouter.ai/api/v1',
+  },
+  {
+    id: 'ollama',
+    name: 'Ollama (Lokal / Offline)',
+    tagline: '100% Offline, Gratis, & Privasi Aman di Komputer Anda',
+    tierBadge: '💻 Lokal / Offline',
+    tierType: 'local',
+    description: 'Jalankan AI langsung di komputer/laptop Anda tanpa koneksi internet dan tanpa perlu API Key.',
+    defaultModel: 'qwen2.5:7b',
+    availableModels: [
+      { id: 'qwen2.5:7b', name: 'Qwen 2.5 (7B)', badge: 'Rekomendasi Lokal', description: 'Bahasa Indonesia sangat fasih (ram ~8GB)' },
+      { id: 'llama3.2:3b', name: 'Llama 3.2 (3B)', badge: 'Ringan', description: 'Sangat hemat RAM untuk laptop biasa (ram ~4GB)' },
+      { id: 'deepseek-r1:8b', name: 'DeepSeek R1 (8B)', badge: 'Penalaran', description: 'Model reasoning lokal untuk soal numerasi & sains' },
+      { id: 'custom', name: 'Model Custom Lainnya...', badge: 'Custom', description: 'Gunakan nama model apapun yang sudah di-pull di Ollama' },
+    ],
+    requiresApiKey: false,
+    supportsCustomBaseUrl: true,
+    defaultBaseUrl: 'http://localhost:11434/v1',
+    apiKeyHelpTitle: 'Panduan Menjalankan Ollama Lokal:',
+    apiKeyHelpUrl: 'https://ollama.com',
+    apiKeyHelpSteps: [
+      'Download & instal Ollama dari ollama.com di laptop/PC Anda',
+      'Buka Command Prompt / Terminal, jalankan: ollama run qwen2.5:7b',
+      'Pastikan Ollama berjalan di background (port 11434)',
+      'Aplikasi ini akan otomatis terhubung ke localhost Anda tanpa internet!',
+    ],
+  },
+  {
+    id: 'deepseek',
+    name: 'DeepSeek Official API',
+    tagline: 'Model Penalaran Terbaik dengan Biaya Termurah',
+    tierBadge: '💳 Berbayar (Sangat Murah)',
+    tierType: 'paid',
+    description: 'API resmi DeepSeek. Sangat murah dan luar biasa cerdas dalam pembuatan soal HOTS dan sains.',
+    defaultModel: 'deepseek-chat',
+    availableModels: [
+      { id: 'deepseek-chat', name: 'DeepSeek-V3 (Chat)', badge: 'Sangat Cerdas', description: 'Model serbaguna untuk semua mata pelajaran' },
+      { id: 'deepseek-reasoner', name: 'DeepSeek-R1 (Reasoning)', badge: 'HOTS Tertinggi', description: 'Berpikir mendalam untuk soal matematika, fisika, & analisis' },
+    ],
+    requiresApiKey: true,
+    apiKeyPlaceholder: 'sk-...',
+    apiKeyHelpTitle: 'Cara Mendapatkan DeepSeek API Key:',
+    apiKeyHelpUrl: 'https://platform.deepseek.com/api_keys',
+    apiKeyHelpSteps: [
+      'Buka platform.deepseek.com',
+      'Daftar dan lakukan top-up saldo minimum (sekitar $2)',
+      'Buka menu API Keys dan buat key baru',
+    ],
+    defaultBaseUrl: 'https://api.deepseek.com/v1',
+  },
+  {
+    id: 'openai',
+    name: 'OpenAI (ChatGPT)',
+    tagline: 'Standar Industri GPT-4o & GPT-4o Mini',
+    tierBadge: '💳 Berbayar',
+    tierType: 'paid',
+    description: 'Model standar industri dari OpenAI dengan format JSON yang sangat stabil dan terpercaya.',
+    defaultModel: 'gpt-4o-mini',
+    availableModels: [
+      { id: 'gpt-4o-mini', name: 'GPT-4o Mini', badge: 'Hemat & Cepat', description: 'Kualitas sangat baik dengan harga yang terjangkau' },
+      { id: 'gpt-4o', name: 'GPT-4o (Flagship)', badge: 'Kualitas Tertinggi', description: 'Model terbaik OpenAI untuk naskah ujian terlengkap' },
+    ],
+    requiresApiKey: true,
+    apiKeyPlaceholder: 'sk-proj-...',
+    apiKeyHelpTitle: 'Cara Mendapatkan OpenAI API Key:',
+    apiKeyHelpUrl: 'https://platform.openai.com/api-keys',
+    apiKeyHelpSteps: [
+      'Buka platform.openai.com/api-keys',
+      'Login dan pastikan akun memiliki saldo API kredit',
+      'Klik "Create new secret key" dan tempelkan di sini',
+    ],
+    defaultBaseUrl: 'https://api.openai.com/v1',
+  },
+];
+
+export const DEFAULT_AI_SETTINGS: UserAISettings = {
+  activeProvider: 'gemini',
+  providers: {
+    gemini: {
+      apiKey: '',
+      model: 'gemini-2.5-flash',
+    },
+    groq: {
+      apiKey: '',
+      model: 'llama-3.3-70b-versatile',
+      customBaseUrl: 'https://api.groq.com/openai/v1',
+    },
+    openrouter: {
+      apiKey: '',
+      model: 'google/gemini-2.0-flash-exp:free',
+      customBaseUrl: 'https://openrouter.ai/api/v1',
+    },
+    ollama: {
+      apiKey: 'ollama',
+      model: 'qwen2.5:7b',
+      customBaseUrl: 'http://localhost:11434/v1',
+    },
+    deepseek: {
+      apiKey: '',
+      model: 'deepseek-chat',
+      customBaseUrl: 'https://api.deepseek.com/v1',
+    },
+    openai: {
+      apiKey: '',
+      model: 'gpt-4o-mini',
+      customBaseUrl: 'https://api.openai.com/v1',
+    },
+  },
+};
+

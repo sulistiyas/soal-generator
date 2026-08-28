@@ -1,30 +1,66 @@
-﻿'use client';
+'use client';
 
 import React, { useState, useEffect } from 'react';
 import { Navbar } from '@/components/Navbar';
 import { ApiKeyModal } from '@/components/ApiKeyModal';
 import { ExamForm } from '@/components/ExamForm';
 import { ExamPreview } from '@/components/ExamPreview';
-import { ExamData, ExamGenerationRequest } from '@/types/exam';
+import { ExamData, ExamGenerationRequest, UserAISettings } from '@/types/exam';
+import { DEFAULT_AI_SETTINGS, AI_PROVIDERS } from '@/lib/constants';
 import { Sparkles, ShieldAlert } from 'lucide-react';
 
 export default function Home() {
-  const [apiKey, setApiKey] = useState('');
+  const [aiSettings, setAiSettings] = useState<UserAISettings>(DEFAULT_AI_SETTINGS);
   const [isApiKeyModalOpen, setIsApiKeyModalOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [examData, setExamData] = useState<ExamData | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   useEffect(() => {
-    const savedKey = localStorage.getItem('edusoal_gemini_api_key');
-    if (savedKey) {
-      setApiKey(savedKey);
+    try {
+      const savedSettings = localStorage.getItem('edusoal_ai_settings');
+      if (savedSettings) {
+        const parsed = JSON.parse(savedSettings);
+        setAiSettings({
+          ...DEFAULT_AI_SETTINGS,
+          ...parsed,
+          providers: {
+            ...DEFAULT_AI_SETTINGS.providers,
+            ...(parsed.providers || {}),
+          },
+        });
+      } else {
+        // Check for legacy single gemini key
+        const legacyGeminiKey = localStorage.getItem('edusoal_gemini_api_key');
+        if (legacyGeminiKey) {
+          setAiSettings((prev) => ({
+            ...prev,
+            providers: {
+              ...prev.providers,
+              gemini: {
+                ...prev.providers.gemini,
+                apiKey: legacyGeminiKey,
+              },
+            },
+          }));
+        }
+      }
+    } catch (e) {
+      console.error('Failed to load saved AI settings:', e);
     }
   }, []);
 
-  const handleSaveApiKey = (key: string) => {
-    setApiKey(key);
-    localStorage.setItem('edusoal_gemini_api_key', key);
+  const handleSaveSettings = (newSettings: UserAISettings) => {
+    setAiSettings(newSettings);
+    try {
+      localStorage.setItem('edusoal_ai_settings', JSON.stringify(newSettings));
+      // Sync legacy gemini key just in case
+      if (newSettings.providers.gemini?.apiKey) {
+        localStorage.setItem('edusoal_gemini_api_key', newSettings.providers.gemini.apiKey);
+      }
+    } catch (e) {
+      console.error('Failed to save AI settings:', e);
+    }
   };
 
   const handleGenerate = async (requestData: ExamGenerationRequest) => {
@@ -35,10 +71,7 @@ export default function Home() {
       const response = await fetch('/api/generate', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          ...requestData,
-          userApiKey: apiKey || undefined,
-        }),
+        body: JSON.stringify(requestData),
       });
 
       const result = await response.json();
@@ -51,7 +84,10 @@ export default function Home() {
       window.scrollTo({ top: 0, behavior: 'smooth' });
     } catch (err: any) {
       setErrorMessage(err.message || 'Terjadi kesalahan saat menghubungi server.');
-      if (!apiKey) {
+      
+      const activeProvider = AI_PROVIDERS.find((p) => p.id === aiSettings.activeProvider);
+      const activeProviderSetting = aiSettings.providers[aiSettings.activeProvider];
+      if (activeProvider?.requiresApiKey && !activeProviderSetting?.apiKey) {
         setIsApiKeyModalOpen(true);
       }
     } finally {
@@ -62,15 +98,15 @@ export default function Home() {
   return (
     <div className="min-h-screen bg-slate-50 flex flex-col font-sans">
       <Navbar
-        hasApiKey={!!apiKey}
+        aiSettings={aiSettings}
         onOpenApiKeyModal={() => setIsApiKeyModalOpen(true)}
       />
 
       <ApiKeyModal
         isOpen={isApiKeyModalOpen}
         onClose={() => setIsApiKeyModalOpen(false)}
-        apiKey={apiKey}
-        onSaveApiKey={handleSaveApiKey}
+        aiSettings={aiSettings}
+        onSaveSettings={handleSaveSettings}
       />
 
       <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-6">
@@ -98,13 +134,13 @@ export default function Home() {
               <div className="relative z-10 max-w-2xl space-y-3">
                 <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/15 backdrop-blur text-xs font-semibold text-blue-100">
                   <Sparkles className="w-3.5 h-3.5 text-amber-300" />
-                  Kurikulum Merdeka & Kurikulum 2013
+                  Kurikulum Merdeka & Kurikulum 2013 • Multi-AI Engine
                 </div>
                 <h1 className="text-2xl sm:text-4xl font-extrabold tracking-tight leading-tight">
                   Buat Paket Soal Ujian & Kisi-Kisi Sekolah dalam Hitungan Detik.
                 </h1>
                 <p className="text-blue-100 text-xs sm:text-sm leading-relaxed">
-                  Otomatisasi penyusunan Ulangan Harian, STS/PTS, SAS/PAS lengkap dengan level kognitif (LOTS/HOTS), kunci jawaban, rubrik, dan ekspor langsung ke <strong>Microsoft Word (.docx)</strong>.
+                  Pilih AI gratis favorit Anda (Gemini, Groq, OpenRouter, atau Ollama Offline). Lengkap dengan level kognitif (LOTS/HOTS), kunci jawaban, rubrik, dan ekspor langsung ke <strong>Microsoft Word (.docx)</strong>.
                 </p>
               </div>
 
@@ -116,7 +152,7 @@ export default function Home() {
             <ExamForm
               onGenerate={handleGenerate}
               isLoading={isLoading}
-              hasApiKey={!!apiKey}
+              aiSettings={aiSettings}
               onOpenApiKeyModal={() => setIsApiKeyModalOpen(true)}
             />
           </div>

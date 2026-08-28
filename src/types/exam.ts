@@ -1,4 +1,4 @@
-﻿export type EducationLevel = 'sd' | 'smp' | 'sma' | 'smk';
+export type EducationLevel = 'sd' | 'smp' | 'sma' | 'smk';
 
 export type CurriculumType = 'merdeka' | 'k13';
 
@@ -60,6 +60,44 @@ export interface ExamData {
   rubrics?: RubricItem[];
 }
 
+export type AIProviderId = 'gemini' | 'groq' | 'openrouter' | 'ollama' | 'deepseek' | 'openai';
+
+export interface AIModelOption {
+  id: string;
+  name: string;
+  badge?: string; // e.g. "Rekomendasi", "Free Tier", "Super Cepat", "Penalaran HOTS"
+  description?: string;
+}
+
+export interface AIProviderConfig {
+  id: AIProviderId;
+  name: string;
+  tagline: string;
+  tierBadge: string; // e.g. "Gratis (Rekomendasi)", "Gratis (Super Cepat)", "Lokal / Offline", "Berbayar"
+  tierType: 'free' | 'freemium' | 'local' | 'paid';
+  description: string;
+  defaultModel: string;
+  availableModels: AIModelOption[];
+  requiresApiKey: boolean;
+  apiKeyPlaceholder?: string;
+  apiKeyHelpUrl?: string;
+  apiKeyHelpTitle?: string;
+  apiKeyHelpSteps?: string[];
+  supportsCustomBaseUrl?: boolean;
+  defaultBaseUrl?: string;
+}
+
+export interface ProviderSettingItem {
+  apiKey: string;
+  model: string;
+  customBaseUrl?: string;
+}
+
+export interface UserAISettings {
+  activeProvider: AIProviderId;
+  providers: Record<AIProviderId, ProviderSettingItem>;
+}
+
 export interface ExamGenerationRequest {
   schoolName: string;
   educationLevel: EducationLevel;
@@ -81,4 +119,8 @@ export interface ExamGenerationRequest {
   };
   additionalInstructions?: string;
   userApiKey?: string;
+  aiProvider?: AIProviderId;
+  aiModel?: string;
+  customBaseUrl?: string;
 }
+

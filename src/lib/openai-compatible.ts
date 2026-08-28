@@ -1,17 +1,20 @@
-import { GoogleGenAI } from '@google/genai';
-import { ExamData, ExamGenerationRequest } from '@/types/exam';
+import { ExamData, ExamGenerationRequest, AIProviderId } from '@/types/exam';
 
-export async function generateExamWithGemini(
-  request: ExamGenerationRequest,
-  apiKey: string,
-  modelName: string = 'gemini-2.5-flash'
-): Promise<ExamData> {
-  if (!apiKey) {
-    throw new Error('API Key Google Gemini belum diatur. Silakan masukkan API Key di menu pengaturan atau file .env.local.');
-  }
+interface OpenAICompatibleParams {
+  request: ExamGenerationRequest;
+  apiKey: string;
+  provider: AIProviderId;
+  model: string;
+  baseUrl: string;
+}
 
-  const ai = new GoogleGenAI({ apiKey });
-
+export async function generateExamWithOpenAICompatible({
+  request,
+  apiKey,
+  provider,
+  model,
+  baseUrl,
+}: OpenAICompatibleParams): Promise<ExamData> {
   const optionCount = request.educationLevel === 'sd' || request.educationLevel === 'smp' ? 4 : 5;
   const optionLetters = optionCount === 4 ? 'A, B, C, D' : 'A, B, C, D, E';
 
@@ -25,9 +28,9 @@ Prinsip Pembuatan Soal:
 4. Format Pilihan Ganda: Untuk jenjang ini gunakan opsi (${optionLetters}). Pengecoh (distraktor) harus homogen dan masuk akal.
 5. Kisi-kisi & Rubrik: Setiap nomor soal wajib memiliki Indikator Soal terperinci, Capaian/Tujuan Pembelajaran, dan Kunci Jawaban beserta Pembahasan mendalam. Untuk soal uraian sertakan rubrik penskoran bergradasi (skor maksimal, kriteria, dan pembagian skor).
 
-Wajib menghasilkan output dalam format JSON valid murni sesuai struktur yang diminta.`;
+Wajib menghasilkan output HANYA dalam format JSON valid murni tanpa teks pembuka atau penutup lainnya.`;
 
-  const prompt = `Buatkan paket naskah soal ujian lengkap dengan parameter berikut:
+  const userPrompt = `Buatkan paket naskah soal ujian lengkap dengan parameter berikut:
 - Nama Sekolah: ${request.schoolName || 'SEKOLAH CONTOH'}
 - Jenjang: ${request.educationLevel.toUpperCase()}
 - Kelas: ${request.grade}
@@ -102,26 +105,97 @@ Struktur JSON yang WAJIB dihasilkan:
   ]
 }`;
 
+  // Clean base URL (remove trailing slashes)
+  const normalizedBaseUrl = (baseUrl || '').replace(/\/+$/, '');
+  const endpoint = `${normalizedBaseUrl}/chat/completions`;
+
+  const headers: Record<string, string> = {
+    'Content-Type': 'application/json',
+  };
+
+  if (apiKey) {
+    headers['Authorization'] = `Bearer ${apiKey}`;
+  }
+
+  // Optional headers for OpenRouter
+  if (provider === 'openrouter') {
+    headers['HTTP-Referer'] = 'https://soal-generator.local';
+    headers['X-Title'] = 'Generator Soal Indonesia';
+  }
+
+  const payload: any = {
+    model: model,
+    messages: [
+      { role: 'system', content: systemInstruction },
+      { role: 'user', content: userPrompt },
+    ],
+    temperature: 0.3,
+  };
+
+  // Support response_format json_object for supported providers
+  if (provider === 'openai' || provider === 'groq' || provider === 'deepseek') {
+    payload.response_format = { type: 'json_object' };
+  }
+
   try {
-    const response = await ai.models.generateContent({
-      model: modelName || 'gemini-2.5-flash',
-      contents: prompt,
-      config: {
-        systemInstruction,
-        responseMimeType: 'application/json',
-      },
+    const res = await fetch(endpoint, {
+      method: 'POST',
+      headers,
+      body: JSON.stringify(payload),
     });
 
-    const text = response.text || '';
-    if (!text) {
-      throw new Error('Tidak ada respon teks dari model AI Gemini.');
+    if (!res.ok) {
+      let errorDetail = '';
+      try {
+        const errorJson = await res.json();
+        errorDetail = errorJson?.error?.message || errorJson?.message || JSON.stringify(errorJson);
+      } catch {
+        errorDetail = await res.text();
+      }
+
+      if (res.status === 401) {
+        throw new Error(
+          `API Key ${provider.toUpperCase()} tidak valid atau belum diisi. Silakan periksa di menu Pengaturan AI.`
+        );
+      }
+      if (res.status === 429) {
+        throw new Error(
+          `Batas kuota/rate limit provider ${provider.toUpperCase()} telah tercapai. Coba beberapa saat lagi atau beralih ke provider AI gratis lainnya.`
+        );
+      }
+      if (res.status === 404 && provider === 'ollama') {
+        throw new Error(
+          `Ollama tidak menemukan model "${model}". Pastikan Anda sudah menjalankan "ollama run ${model}" di komputer Anda.`
+        );
+      }
+
+      throw new Error(`[${provider.toUpperCase()} ${res.status}]: ${errorDetail}`);
     }
 
-    const cleanJson = text.trim().replace(/^```json\s*/, '').replace(/```$/, '');
-    const data: ExamData = JSON.parse(cleanJson);
-    return data;
+    const data = await res.json();
+    const rawContent = data?.choices?.[0]?.message?.content;
+
+    if (!rawContent) {
+      throw new Error(`Tidak ada konten respon yang diterima dari provider ${provider.toUpperCase()}.`);
+    }
+
+    // Clean JSON content from possible markdown blocks
+    const cleanJson = rawContent
+      .trim()
+      .replace(/^```json\s*/i, '')
+      .replace(/^```\s*/i, '')
+      .replace(/```$/i, '')
+      .trim();
+
+    const parsedExamData: ExamData = JSON.parse(cleanJson);
+    return parsedExamData;
   } catch (error: any) {
-    console.error('Gemini Generation Error:', error);
-    throw new Error(error?.message || 'Gagal menghasilkan soal dengan AI.');
+    console.error(`Error in generateExamWithOpenAICompatible (${provider}):`, error);
+    if (provider === 'ollama' && error?.message?.includes('fetch failed')) {
+      throw new Error(
+        'Gagal terhubung ke Ollama lokal. Pastikan aplikasi Ollama sudah menyala dan berjalan di port 11434.'
+      );
+    }
+    throw new Error(error?.message || `Gagal menghasilkan soal dengan provider ${provider}.`);
   }
 }

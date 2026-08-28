@@ -1,4 +1,4 @@
-﻿'use client';
+'use client';
 
 import React, { useState, useEffect } from 'react';
 import {
@@ -6,21 +6,41 @@ import {
   CurriculumType,
   ExamCategory,
   ExamGenerationRequest,
+  UserAISettings,
+  AIProviderId,
 } from '@/types/exam';
-import { EDUCATION_LEVELS, EXAM_CATEGORIES, CURRICULA } from '@/lib/constants';
-import { Sparkles, BookOpen, Clock, School, Sliders } from 'lucide-react';
+import {
+  EDUCATION_LEVELS,
+  EXAM_CATEGORIES,
+  CURRICULA,
+  AI_PROVIDERS,
+} from '@/lib/constants';
+import {
+  Sparkles,
+  BookOpen,
+  Clock,
+  School,
+  Sliders,
+  Zap,
+  Globe,
+  HardDrive,
+  Cpu,
+  Bot,
+  Settings2,
+  AlertCircle,
+} from 'lucide-react';
 
 interface ExamFormProps {
   onGenerate: (data: ExamGenerationRequest) => void;
   isLoading: boolean;
-  hasApiKey: boolean;
+  aiSettings: UserAISettings;
   onOpenApiKeyModal: () => void;
 }
 
 export const ExamForm: React.FC<ExamFormProps> = ({
   onGenerate,
   isLoading,
-  hasApiKey,
+  aiSettings,
   onOpenApiKeyModal,
 }) => {
   const [schoolName, setSchoolName] = useState('SMP NEGERI 1 NUSANTARA');
@@ -60,6 +80,11 @@ export const ExamForm: React.FC<ExamFormProps> = ({
     }
   };
 
+  const activeProviderId: AIProviderId = aiSettings?.activeProvider || 'gemini';
+  const activeConfig = AI_PROVIDERS.find((p) => p.id === activeProviderId) || AI_PROVIDERS[0];
+  const activeProviderSettings = aiSettings?.providers?.[activeProviderId];
+  const hasKey = !activeConfig.requiresApiKey || !!activeProviderSettings?.apiKey;
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
 
@@ -86,7 +111,28 @@ export const ExamForm: React.FC<ExamFormProps> = ({
       essayCount,
       difficultyRatio,
       additionalInstructions,
+      aiProvider: activeProviderId,
+      aiModel: activeProviderSettings?.model || activeConfig.defaultModel,
+      userApiKey: activeProviderSettings?.apiKey || undefined,
+      customBaseUrl: activeProviderSettings?.customBaseUrl || undefined,
     });
+  };
+
+  const getProviderIcon = (id: AIProviderId) => {
+    switch (id) {
+      case 'gemini':
+        return <Sparkles className="w-4 h-4 text-blue-500" />;
+      case 'groq':
+        return <Zap className="w-4 h-4 text-amber-500" />;
+      case 'openrouter':
+        return <Globe className="w-4 h-4 text-purple-500" />;
+      case 'ollama':
+        return <HardDrive className="w-4 h-4 text-emerald-500" />;
+      case 'deepseek':
+        return <Cpu className="w-4 h-4 text-cyan-500" />;
+      case 'openai':
+        return <Bot className="w-4 h-4 text-emerald-600" />;
+    }
   };
 
   const levelInfo = EDUCATION_LEVELS[level];
@@ -360,8 +406,40 @@ export const ExamForm: React.FC<ExamFormProps> = ({
         </div>
       </div>
 
+      {/* Info AI Provider Box */}
+      <div className="rounded-2xl border border-slate-200 bg-white p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-2xs">
+        <div className="flex items-center gap-3">
+          <div className="p-2.5 rounded-xl bg-slate-100">
+            {getProviderIcon(activeConfig.id)}
+          </div>
+          <div>
+            <div className="flex items-center gap-2">
+              <span className="text-xs text-slate-500">AI Generator:</span>
+              <span className="text-xs font-bold text-slate-900">
+                {activeConfig.name} ({activeProviderSettings?.model || activeConfig.defaultModel})
+              </span>
+              <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-blue-50 text-blue-700 border border-blue-200">
+                {activeConfig.tierBadge}
+              </span>
+            </div>
+            <p className="text-[11px] text-slate-500 mt-0.5">
+              {hasKey ? 'Status: Siap digunakan' : '⚠️ Kunci API belum diisi'}
+            </p>
+          </div>
+        </div>
+
+        <button
+          type="button"
+          onClick={onOpenApiKeyModal}
+          className="inline-flex items-center justify-center gap-1.5 px-3.5 py-2 text-xs font-semibold text-slate-700 hover:text-blue-700 bg-slate-50 hover:bg-blue-50 border border-slate-200 hover:border-blue-200 rounded-xl transition-all cursor-pointer"
+        >
+          <Settings2 className="w-3.5 h-3.5" />
+          <span>Ganti AI / Atur Key</span>
+        </button>
+      </div>
+
       {/* Tombol Action Generate */}
-      <div className="pt-2">
+      <div className="pt-1">
         <button
           type="submit"
           disabled={isLoading}
@@ -380,17 +458,22 @@ export const ExamForm: React.FC<ExamFormProps> = ({
           )}
         </button>
 
-        {!hasApiKey && (
-          <p className="text-center text-xs text-amber-700 mt-2.5 bg-amber-50 py-1.5 px-3 rounded-lg border border-amber-200">
-            ⚠️ API Key Gemini belum terpasang.{' '}
+        {!hasKey && (
+          <div className="mt-3 p-3 rounded-xl bg-amber-50 border border-amber-200 flex items-center justify-between text-xs text-amber-800">
+            <div className="flex items-center gap-2">
+              <AlertCircle className="w-4 h-4 text-amber-600 shrink-0" />
+              <span>
+                API Key untuk <strong>{activeConfig.name}</strong> belum terpasang.
+              </span>
+            </div>
             <button
               type="button"
               onClick={onOpenApiKeyModal}
-              className="font-bold underline text-amber-900 hover:text-black cursor-pointer"
+              className="font-bold underline text-amber-900 hover:text-black cursor-pointer ml-2"
             >
-              Klik di sini untuk memasukkan API Key gratis
+              Atur API Key Gratis
             </button>
-          </p>
+          </div>
         )}
       </div>
     </form>
