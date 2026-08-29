@@ -303,7 +303,15 @@ export default function GeneratedExamPage() {
                     className="inline-flex items-center gap-1 hover:text-blue-600 transition-colors"
                   >
                     <Home className="w-3.5 h-3.5" />
-                    <span>Beranda Generator</span>
+                    <span>Portal Hub</span>
+                  </Link>
+                  <span>/</span>
+                  <Link
+                    href="/tools/soal-generator"
+                    className="inline-flex items-center gap-1 hover:text-blue-600 transition-colors"
+                  >
+                    <FileQuestion className="w-3.5 h-3.5" />
+                    <span>Generator Soal</span>
                   </Link>
                   <span>/</span>
                   <span className="text-slate-700 font-semibold">Hasil Generate</span>
@@ -366,7 +374,7 @@ export default function GeneratedExamPage() {
                 </button>
 
                 <Link
-                  href="/"
+                  href="/tools/soal-generator"
                   className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 text-white text-xs font-semibold shadow-xs hover:shadow transition-all cursor-pointer"
                 >
                   <ArrowLeft className="w-4 h-4" />
@@ -379,7 +387,7 @@ export default function GeneratedExamPage() {
             <ExamPreview
               exam={examData}
               onUpdateExam={handleUpdateExam}
-              onReset={() => router.push('/')}
+              onReset={() => router.push('/tools/soal-generator')}
             />
           </>
         ) : (
@@ -401,7 +409,7 @@ export default function GeneratedExamPage() {
 
             <div className="pt-2 flex items-center justify-center gap-3">
               <Link
-                href="/"
+                href="/tools/soal-generator"
                 className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-semibold text-xs shadow-sm hover:shadow transition-all"
               >
                 <Sparkles className="w-4 h-4 text-amber-300" />
@@ -414,7 +422,7 @@ export default function GeneratedExamPage() {
 
       {/* Footer */}
       <footer className="border-t border-slate-200 bg-white py-6 text-center text-xs text-slate-500 print:hidden">
-        <p>EduSoal AI &copy; 2026 • Dirancang untuk Guru & Sekolah Indonesia</p>
+        <p>Teacher Tools Hub • EduSoal AI &copy; 2026 • Dirancang untuk Guru & Sekolah Indonesia</p>
       </footer>
 
       {/* Floating Donate Widget & Modal (Auto-open on page load/refresh) */}

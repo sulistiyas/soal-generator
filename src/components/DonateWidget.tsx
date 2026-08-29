@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import Image from 'next/image';
-import { DONATION_CONFIG } from '@/lib/donation';
+import { DONATION_CONFIG, DONATE_MODAL_EVENT } from '@/lib/donation';
 
 type PaymentTab = 'qris' | 'bca' | 'saweria';
 
@@ -19,6 +19,17 @@ export const DonateWidget: React.FC<DonateWidgetProps> = ({
   const [activeTab, setActiveTab] = useState<PaymentTab>('qris');
   const [isCopied, setIsCopied] = useState(false);
   const [isQrZoomed, setIsQrZoomed] = useState(false);
+
+  // Listen to custom open donation modal event from anywhere in the app
+  useEffect(() => {
+    const handleOpen = () => {
+      setIsOpen(true);
+    };
+    window.addEventListener(DONATE_MODAL_EVENT, handleOpen);
+    return () => {
+      window.removeEventListener(DONATE_MODAL_EVENT, handleOpen);
+    };
+  }, []);
 
   // Auto-open modal on mount / page refresh if requested
   useEffect(() => {

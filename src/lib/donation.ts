@@ -23,3 +23,11 @@ export const DONATION_CONFIG: DonationConfig = {
   gopayName: process.env.NEXT_PUBLIC_DONATION_GOPAY_NAME || 'Sulistiya Nugroho',
   gopayUrl: process.env.NEXT_PUBLIC_DONATION_GOPAY_URL || 'https://gopay.co.id/',
 };
+
+export const DONATE_MODAL_EVENT = 'edusoal_open_donate_modal';
+
+export function openDonationModal() {
+  if (typeof window !== 'undefined') {
+    window.dispatchEvent(new CustomEvent(DONATE_MODAL_EVENT));
+  }
+}

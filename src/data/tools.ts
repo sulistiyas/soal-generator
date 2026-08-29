@@ -1,0 +1,133 @@
+import { TeacherTool, CategoryFilterItem } from '@/types/tool';
+
+export const CATEGORIES: CategoryFilterItem[] = [
+  { id: 'all', label: 'Semua Alat', description: 'Kumpulan seluruh alat bantu guru' },
+  { id: 'evaluasi', label: 'Evaluasi & Ujian', description: 'Soal, kisi-kisi, kunci jawaban, dan rubrik asesmen' },
+  { id: 'administrasi', label: 'Administrasi Guru', description: 'Modul ajar, RPP, capaian rapor, dan kelengkapan ajar' },
+  { id: 'kreatif', label: 'Kreatif & Kelas', description: 'LKPD, ice breaking, game interaktif, dan media ajar' },
+];
+
+export const TEACHER_TOOLS: TeacherTool[] = [
+  {
+    id: 'soal-generator',
+    title: 'Generator Soal AI & Kisi-Kisi',
+    slug: 'soal-generator',
+    description:
+      'Buat paket naskah soal ujian (Pilihan Ganda, Essay, Isian, Benar/Salah) lengkap dengan kisi-kisi, rubrik penilaian, kunci jawaban, dan ekspor langsung ke format Microsoft Word (.docx).',
+    category: 'evaluasi',
+    categoryLabel: 'Evaluasi & Ujian',
+    iconName: 'FileQuestion',
+    status: 'active',
+    tags: ['Kurikulum Merdeka', 'K-13', 'SD • SMP • SMA/SMK', 'Multi-AI'],
+    path: '/tools/soal-generator',
+    badge: 'Siap Pakai',
+    features: [
+      'Multi AI Engine (Gemini, Groq, Ollama, OpenRouter, DeepSeek)',
+      'Ekspor Naskah & Kisi-kisi ke MS Word (.docx)',
+      'Level Kognitif LOTS / MOTS / HOTS & Taksonomi Bloom',
+      'Riwayat Soal Tersimpan Otomatis & Link Unik Berbagi',
+    ],
+    targetAudience: 'Guru SD, SMP, SMA, SMK & Madrasah',
+  },
+  {
+    id: 'modul-ajar-generator',
+    title: 'Generator Modul Ajar & RPP',
+    slug: 'modul-ajar-generator',
+    description:
+      'Susun Modul Ajar Kurikulum Merdeka atau RPP 1 Lembar secara otomatis berdasarkan Capaian Pembelajaran (CP), Alur Tujuan Pembelajaran (ATP), dan Profil Pelajar Pancasila.',
+    category: 'administrasi',
+    categoryLabel: 'Administrasi Guru',
+    iconName: 'BookText',
+    status: 'coming_soon',
+    tags: ['Kurikulum Merdeka', 'RPP 1 Lembar', 'CP & ATP', 'P5'],
+    path: '/tools/modul-ajar',
+    badge: 'Segera Hadir',
+    features: [
+      'Struktur Modul Ajar Standar Kemendikbudristek',
+      'Integrasi Dimensi Profil Pelajar Pancasila (P5)',
+      'Diferensiasi Pembelajaran & Alokasi Waktu Fleksibel',
+      'Ekspor Lengkap ke Dokumen Word Siap Edit',
+    ],
+    targetAudience: 'Semua Guru Mata Pelajaran & Wali Kelas',
+  },
+  {
+    id: 'kisi-kisi-rubrik',
+    title: 'Pembuat Kisi-Kisi & Rubrik Penilaian',
+    slug: 'kisi-kisi-rubrik',
+    description:
+      'Rancang format matriks kisi-kisi soal dan rubrik penilaian asesmen formatif maupun sumatif berdasarkan indikator kompetensi dan taksonomi pembelajaran.',
+    category: 'evaluasi',
+    categoryLabel: 'Evaluasi & Ujian',
+    iconName: 'ListChecks',
+    status: 'coming_soon',
+    tags: ['Taksonomi Bloom', 'Asesmen Formatif & Sumatif', 'Skala Skor'],
+    path: '/tools/rubrik-penilaian',
+    badge: 'Segera Hadir',
+    features: [
+      'Tabel Kisi-kisi Standar Penulisan Soal Nasional',
+      'Kriteria Penilaian Analitik & Holistik',
+      'Pedoman Penskoran Terukur dan Jelas',
+    ],
+    targetAudience: 'Guru Penyusun Asesmen & Tim Kurikulum',
+  },
+  {
+    id: 'deskripsi-rapor',
+    title: 'Generator Deskripsi Capaian Rapor',
+    slug: 'deskripsi-rapor',
+    description:
+      'Bantu guru merumuskan narasi deskripsi nilai rapor (e-Rapor Kurikulum Merdeka & K-13) yang konstruktif dan bermakna untuk setiap capaian tertinggi dan yang perlu ditingkatkan siswa.',
+    category: 'administrasi',
+    categoryLabel: 'Administrasi Guru',
+    iconName: 'GraduationCap',
+    status: 'coming_soon',
+    tags: ['e-Rapor', 'Kurikulum Merdeka', 'Narasi Otomatis', 'Batch Siswa'],
+    path: '/tools/deskripsi-rapor',
+    badge: 'Segera Hadir',
+    features: [
+      'Penyusunan Kalimat Positif & Membangun',
+      'Penyesuaian Otomatis Capaian TP (Tujuan Pembelajaran)',
+      'Mendukung Salin Massal untuk Banyak Siswa Sekaligus',
+    ],
+    targetAudience: 'Wali Kelas & Guru Pengampu Rapor',
+  },
+  {
+    id: 'ice-breaking-game',
+    title: 'Ide Ice Breaking & Game Interaktif Kelas',
+    slug: 'ice-breaking-game',
+    description:
+      'Dapatkan ratusan ide permainan penyemangat, tebak-tebakan edukatif, dan aktivitas interaktif tanpa persiapan rumit untuk mencairkan suasana belajar di kelas.',
+    category: 'kreatif',
+    categoryLabel: 'Kreatif & Kelas',
+    iconName: 'Gamepad2',
+    status: 'coming_soon',
+    tags: ['Semangat Belajar', 'Tanpa Alat / Dengan Alat', '10 Menit Ceria'],
+    path: '/tools/ice-breaking',
+    badge: 'Segera Hadir',
+    features: [
+      'Kategori Berdasarkan Suasana (Pagi, Siang Ngantuk, Pasca Ujian)',
+      'Instruksi Step-by-step yang Mudah Dipandu',
+      'Variasi Game Sesuai Tingkat Usia & Ukuran Kelas',
+    ],
+    targetAudience: 'Semua Guru Pengajar di Kelas',
+  },
+  {
+    id: 'lkpd-generator',
+    title: 'Penyusun LKPD (Lembar Kerja Peserta Didik)',
+    slug: 'lkpd-generator',
+    description:
+      'Ciptakan lembar kerja aktivitas siswa yang menarik, terstruktur, berbasis studi kasus atau eksperimen sederhana dengan petunjuk kerja yang ramah anak.',
+    category: 'kreatif',
+    categoryLabel: 'Kreatif & Kelas',
+    iconName: 'Layers',
+    status: 'coming_soon',
+    tags: ['Aktivitas Kelompok', 'Format Siap Cetak', 'Inquiry Based'],
+    path: '/tools/lkpd-generator',
+    badge: 'Segera Hadir',
+    features: [
+      'Format LKPD Interaktif & Problem-Based Learning (PBL)',
+      'Tugas Mandiri & Eksplorasi Kelompok',
+      'Siap Dicetak atau Dibagikan sebagai PDF/Word',
+    ],
+    targetAudience: 'Guru Kelas & Praktisi Pembelajaran Aktif',
+  },
+];
