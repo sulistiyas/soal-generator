@@ -7,6 +7,7 @@ import { DonateWidget } from '@/components/DonateWidget';
 import { TEACHER_TOOLS, CATEGORIES } from '@/data/tools';
 import { TeacherTool, ToolCategory } from '@/types/tool';
 import { openDonationModal } from '@/lib/donation';
+import { trackEvent } from '@/lib/analytics';
 import {
   Sparkles,
   FileQuestion,
@@ -31,6 +32,7 @@ import {
   X,
   Bot,
   Compass,
+  Loader2,
 } from 'lucide-react';
 
 export default function HomePage() {
@@ -42,6 +44,7 @@ export default function HomePage() {
   const [requestRole, setRequestRole] = useState('');
   const [requestToolIdea, setRequestToolIdea] = useState('');
   const [requestDescription, setRequestDescription] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
 
   // Filter tools based on category and search query
@@ -78,31 +81,59 @@ export default function HomePage() {
     return counts;
   }, []);
 
-  const handleRequestSubmit = (e: React.FormEvent) => {
+  const handleRequestSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!requestToolIdea.trim()) return;
+    if (!requestToolIdea.trim() || isSubmitting) return;
+
+    setIsSubmitting(true);
 
     try {
-      const existing = localStorage.getItem('edusoal_teacher_requests');
-      const requests = existing ? JSON.parse(existing) : [];
-      requests.push({
-        id: Date.now().toString(),
-        name: requestName || 'Bapak/Ibu Guru',
-        role: requestRole || 'Guru',
-        toolIdea: requestToolIdea,
-        description: requestDescription,
-        submittedAt: new Date().toISOString(),
+      // 1. Kirim ke backend Next.js API (yang akan meneruskan ke Google Sheets Webhook)
+      await fetch('/api/aspirasi', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          name: requestName,
+          role: requestRole,
+          toolIdea: requestToolIdea,
+          description: requestDescription,
+        }),
       });
-      localStorage.setItem('edusoal_teacher_requests', JSON.stringify(requests));
-    } catch (err) {
-      console.warn('Storage not accessible for feedback submission', err);
-    }
 
-    setIsSubmitted(true);
-    setRequestName('');
-    setRequestRole('');
-    setRequestToolIdea('');
-    setRequestDescription('');
+      // 2. Simpan cadangan di localStorage browser
+      try {
+        const existing = localStorage.getItem('edusoal_teacher_requests');
+        const requests = existing ? JSON.parse(existing) : [];
+        requests.push({
+          id: Date.now().toString(),
+          name: requestName || 'Bapak/Ibu Guru',
+          role: requestRole || 'Guru',
+          toolIdea: requestToolIdea,
+          description: requestDescription,
+          submittedAt: new Date().toISOString(),
+        });
+        localStorage.setItem('edusoal_teacher_requests', JSON.stringify(requests));
+      } catch (err) {
+        console.warn('Storage not accessible for feedback submission', err);
+      }
+
+      setIsSubmitted(true);
+      trackEvent('submit_aspiration', {
+        role: requestRole || 'Guru',
+        tool_idea: requestToolIdea,
+      });
+      setRequestName('');
+      setRequestRole('');
+      setRequestToolIdea('');
+      setRequestDescription('');
+    } catch (err) {
+      console.error('Gagal mengirim aspirasi:', err);
+      setIsSubmitted(true);
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const renderToolIcon = (iconName: string, className = 'w-6 h-6') => {
@@ -576,10 +607,20 @@ export default function HomePage() {
 
                   <button
                     type="submit"
-                    className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs shadow-xs hover:shadow transition-all cursor-pointer"
+                    disabled={isSubmitting}
+                    className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 text-white font-bold text-xs shadow-xs hover:shadow transition-all cursor-pointer disabled:cursor-not-allowed"
                   >
-                    <Send className="w-3.5 h-3.5" />
-                    <span>Kirimkan Aspirasi</span>
+                    {isSubmitting ? (
+                      <>
+                        <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                        <span>Mengirimkan...</span>
+                      </>
+                    ) : (
+                      <>
+                        <Send className="w-3.5 h-3.5" />
+                        <span>Kirimkan Aspirasi</span>
+                      </>
+                    )}
                   </button>
                 </div>
               </form>

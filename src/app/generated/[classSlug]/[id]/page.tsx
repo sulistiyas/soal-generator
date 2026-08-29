@@ -12,6 +12,7 @@ import {
   updateGeneratedExam,
   SavedExam,
 } from '@/lib/exam-storage';
+import { trackEvent } from '@/lib/analytics';
 import {
   ArrowLeft,
   Share2,
@@ -253,6 +254,9 @@ export default function GeneratedExamPage() {
     const url = window.location.href;
     navigator.clipboard.writeText(url);
     setCopiedLink(true);
+    trackEvent('share_exam_link', {
+      exam_id: id as string,
+    });
     setTimeout(() => setCopiedLink(false), 2500);
   };
 

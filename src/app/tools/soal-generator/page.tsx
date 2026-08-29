@@ -12,6 +12,7 @@ import { DonateWidget } from '@/components/DonateWidget';
 import { ExamData, ExamGenerationRequest, UserAISettings, AIProviderId } from '@/types/exam';
 import { DEFAULT_AI_SETTINGS, AI_PROVIDERS } from '@/lib/constants';
 import { saveGeneratedExam } from '@/lib/exam-storage';
+import { trackEvent } from '@/lib/analytics';
 import {
   Sparkles,
   ShieldAlert,
@@ -139,6 +140,16 @@ export default function SoalGeneratorToolPage() {
       const generatedData: ExamData = result.data;
       setExamData(generatedData);
 
+      // Track event di Google Analytics
+      trackEvent('generate_exam', {
+        subject: requestData.subject,
+        grade: requestData.grade,
+        curriculum: requestData.curriculum,
+        pg_count: requestData.pgCount,
+        essay_count: requestData.essayCount,
+        provider: requestData.aiProvider || 'gemini',
+      });
+
       // Save to localStorage and get unique URL
       const savedInfo = saveGeneratedExam(generatedData, requestData);
       setLastGenerated({
@@ -176,6 +187,9 @@ export default function SoalGeneratorToolPage() {
     const fullUrl = `${window.location.origin}${lastGenerated.url}`;
     navigator.clipboard.writeText(fullUrl);
     setCopiedLink(true);
+    trackEvent('share_exam_link', {
+      exam_id: lastGenerated.id,
+    });
     setTimeout(() => setCopiedLink(false), 2500);
   };
 

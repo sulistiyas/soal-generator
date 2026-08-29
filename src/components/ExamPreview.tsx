@@ -4,6 +4,7 @@ import React, { useState } from 'react';
 import { ExamData, QuestionItem } from '@/types/exam';
 import { QuestionCard } from '@/components/QuestionCard';
 import { exportExamToDocx } from '@/lib/docx-generator';
+import { trackEvent } from '@/lib/analytics';
 import {
   FileText,
   Key,
@@ -39,6 +40,11 @@ export const ExamPreview: React.FC<ExamPreviewProps> = ({ exam, onUpdateExam, on
     try {
       setIsExporting(true);
       await exportExamToDocx(exam);
+      trackEvent('export_docx', {
+        subject: exam.subject,
+        grade: exam.grade,
+        question_count: exam.questions?.length,
+      });
       confetti({ particleCount: 60, spread: 60, origin: { y: 0.8 } });
     } catch (err) {
       console.error(err);

@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import Image from 'next/image';
 import { DONATION_CONFIG, DONATE_MODAL_EVENT } from '@/lib/donation';
+import { trackEvent } from '@/lib/analytics';
 
 type PaymentTab = 'qris' | 'bca' | 'saweria';
 
@@ -24,6 +25,7 @@ export const DonateWidget: React.FC<DonateWidgetProps> = ({
   useEffect(() => {
     const handleOpen = () => {
       setIsOpen(true);
+      trackEvent('open_donation_modal', { source: 'custom_event' });
     };
     window.addEventListener(DONATE_MODAL_EVENT, handleOpen);
     return () => {
@@ -36,6 +38,7 @@ export const DonateWidget: React.FC<DonateWidgetProps> = ({
     if (!autoOpenOnMount) return;
     const timer = setTimeout(() => {
       setIsOpen(true);
+      trackEvent('open_donation_modal', { source: 'auto_mount' });
     }, autoOpenDelay);
     return () => clearTimeout(timer);
   }, [autoOpenOnMount, autoOpenDelay]);
@@ -59,6 +62,7 @@ export const DonateWidget: React.FC<DonateWidgetProps> = ({
     try {
       await navigator.clipboard.writeText(text);
       setIsCopied(true);
+      trackEvent('copy_donation_account', { method: activeTab });
       setTimeout(() => setIsCopied(false), 2000);
     } catch (err) {
       console.error('Failed to copy account number:', err);

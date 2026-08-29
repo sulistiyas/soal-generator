@@ -40,3 +40,12 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# Markdown files / AI agent notes
+AGENTS.md
+CLAUDE.md
+agent.md
+claude.md
+*.md
+!README.md
+
