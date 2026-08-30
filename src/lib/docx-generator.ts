@@ -11,9 +11,11 @@ import {
   HeadingLevel,
   PageBreak,
   Packer,
+  ImageRun,
 } from 'docx';
 import { saveAs } from 'file-saver';
 import { ExamData, QuestionItem } from '@/types/exam';
+import { convertVisualToPngArrayBuffer } from '@/lib/geometry-templates';
 
 function safeStr(val: unknown, fallback: string = ''): string {
   if (val === null || val === undefined) return fallback;
@@ -183,19 +185,73 @@ export async function exportExamToDocx(exam: ExamData) {
 
   children.push(new Paragraph({ spacing: { after: 250 } }));
 
-  // Pisahkan soal PG dan Non-PG
+  // Pisahkan soal PG, Isian Singkat, dan Uraian / Essay
   const questions: QuestionItem[] = Array.isArray(exam.questions) ? exam.questions : [];
   const pgQuestions = questions.filter((q) => q.type === 'pg');
-  const essayQuestions = questions.filter((q) => q.type !== 'pg');
+  const isianQuestions = questions.filter((q) => q.type === 'isian');
+  const essayQuestions = questions.filter((q) => q.type === 'uraian' || q.type === 'essay' || (q.type !== 'pg' && q.type !== 'isian'));
+
+  let sectionCounter = 1;
+  const toRoman = (num: number) => (num === 1 ? 'I' : num === 2 ? 'II' : num === 3 ? 'III' : `${num}`);
+
+  // Helper menyematkan gambar diagram ke Word
+  const addQuestionVisual = async (q: QuestionItem) => {
+    const visualSource = q.imageSvg || q.imageUrl;
+    if (!visualSource) return;
+
+    try {
+      const pngResult = await convertVisualToPngArrayBuffer(visualSource);
+      if (pngResult && pngResult.buffer) {
+        children.push(
+          new Paragraph({
+            alignment: AlignmentType.CENTER,
+            spacing: { before: 80, after: 60 },
+            children: [
+              new ImageRun({
+                type: 'png',
+                data: pngResult.buffer,
+                transformation: {
+                  width: pngResult.width,
+                  height: pngResult.height,
+                },
+              }),
+            ],
+          })
+        );
+
+        if (q.imageCaption) {
+          children.push(
+            new Paragraph({
+              alignment: AlignmentType.CENTER,
+              spacing: { after: 80 },
+              children: [
+                new TextRun({
+                  text: safeStr(q.imageCaption),
+                  italics: true,
+                  size: 18,
+                  font: 'Times New Roman',
+                  color: '555555',
+                }),
+              ],
+            })
+          );
+        }
+      }
+    } catch (err) {
+      console.warn(`Gagal menyematkan visual pada soal ${q.number}:`, err);
+    }
+  };
 
   // ================= 4. BAGIAN I: PILIHAN GANDA =================
   if (pgQuestions.length > 0) {
+    const roman = toRoman(sectionCounter++);
     children.push(
       new Paragraph({
         heading: HeadingLevel.HEADING_2,
+        spacing: { before: 200, after: 100 },
         children: [
           new TextRun({
-            text: 'I. PILIHAN GANDA',
+            text: `${roman}. PILIHAN GANDA`,
             bold: true,
             font: 'Times New Roman',
             size: 22,
@@ -215,7 +271,7 @@ export async function exportExamToDocx(exam: ExamData) {
       })
     );
 
-    pgQuestions.forEach((q) => {
+    for (const q of pgQuestions) {
       // Stimulus jika ada
       if (q.stimulus && typeof q.stimulus === 'string' && q.stimulus.trim()) {
         children.push(
@@ -245,6 +301,9 @@ export async function exportExamToDocx(exam: ExamData) {
           })
         );
       }
+
+      // Visual Diagram jika ada
+      await addQuestionVisual(q);
 
       // Pertanyaan
       children.push(
@@ -291,17 +350,19 @@ export async function exportExamToDocx(exam: ExamData) {
           );
         });
       }
-    });
+    }
   }
 
-  // ================= 5. BAGIAN II: URAIAN / ESSAY =================
-  if (essayQuestions.length > 0) {
+  // ================= 5. BAGIAN II: ISIAN SINGKAT =================
+  if (isianQuestions.length > 0) {
+    const roman = toRoman(sectionCounter++);
     children.push(
       new Paragraph({
-        spacing: { before: 300, after: 150 },
+        heading: HeadingLevel.HEADING_2,
+        spacing: { before: 300, after: 100 },
         children: [
           new TextRun({
-            text: pgQuestions.length > 0 ? 'II. URAIAN / ESSAY' : 'NASKAH SOAL URAIAN',
+            text: `${roman}. ISIAN SINGKAT`,
             bold: true,
             font: 'Times New Roman',
             size: 22,
@@ -312,7 +373,7 @@ export async function exportExamToDocx(exam: ExamData) {
         spacing: { after: 150 },
         children: [
           new TextRun({
-            text: 'Jawablah pertanyaan-pertanyaan di bawah ini dengan jelas dan tepat!',
+            text: 'Isilah titik-titik di bawah ini dengan jawaban yang singkat, tepat, dan benar!',
             italics: true,
             font: 'Times New Roman',
             size: 20,
@@ -321,7 +382,7 @@ export async function exportExamToDocx(exam: ExamData) {
       })
     );
 
-    essayQuestions.forEach((q) => {
+    for (const q of isianQuestions) {
       if (q.stimulus && typeof q.stimulus === 'string' && q.stimulus.trim()) {
         children.push(
           new Paragraph({
@@ -338,6 +399,92 @@ export async function exportExamToDocx(exam: ExamData) {
           })
         );
       }
+
+      // Visual Diagram jika ada
+      await addQuestionVisual(q);
+
+      children.push(
+        new Paragraph({
+          spacing: { before: 100, after: 60 },
+          children: [
+            new TextRun({
+              text: `${safeStr(q.number)}. `,
+              bold: true,
+              font: 'Times New Roman',
+              size: 21,
+            }),
+            new TextRun({
+              text: safeStr(q.question),
+              font: 'Times New Roman',
+              size: 21,
+            }),
+          ],
+        }),
+        new Paragraph({
+          indent: { left: 400 },
+          spacing: { after: 120 },
+          children: [
+            new TextRun({
+              text: 'Jawaban: .................................................................................................',
+              font: 'Times New Roman',
+              size: 20,
+              color: '555555',
+            }),
+          ],
+        })
+      );
+    }
+  }
+
+  // ================= 6. BAGIAN III: URAIAN / ESSAY =================
+  if (essayQuestions.length > 0) {
+    const roman = toRoman(sectionCounter++);
+    children.push(
+      new Paragraph({
+        heading: HeadingLevel.HEADING_2,
+        spacing: { before: 300, after: 100 },
+        children: [
+          new TextRun({
+            text: `${roman}. URAIAN / ESSAY`,
+            bold: true,
+            font: 'Times New Roman',
+            size: 22,
+          }),
+        ],
+      }),
+      new Paragraph({
+        spacing: { after: 150 },
+        children: [
+          new TextRun({
+            text: 'Jawablah pertanyaan-pertanyaan di bawah ini dengan uraian yang jelas dan lengkap!',
+            italics: true,
+            font: 'Times New Roman',
+            size: 20,
+          }),
+        ],
+      })
+    );
+
+    for (const q of essayQuestions) {
+      if (q.stimulus && typeof q.stimulus === 'string' && q.stimulus.trim()) {
+        children.push(
+          new Paragraph({
+            indent: { left: 360 },
+            spacing: { before: 100, after: 60 },
+            children: [
+              new TextRun({
+                text: safeStr(q.stimulus),
+                italics: true,
+                font: 'Times New Roman',
+                size: 20,
+              }),
+            ],
+          })
+        );
+      }
+
+      // Visual Diagram jika ada
+      await addQuestionVisual(q);
 
       children.push(
         new Paragraph({
@@ -357,7 +504,7 @@ export async function exportExamToDocx(exam: ExamData) {
           ],
         })
       );
-    });
+    }
   }
 
   // ================= 6. LAMPIRAN: KUNCI JAWABAN & PEMBAHASAN =================
@@ -380,12 +527,13 @@ export async function exportExamToDocx(exam: ExamData) {
   );
 
   questions.forEach((q) => {
+    const typeLabel = q.type === 'pg' ? 'PG' : q.type === 'isian' ? 'ISIAN' : 'URAIAN';
     children.push(
       new Paragraph({
         spacing: { before: 120, after: 60 },
         children: [
           new TextRun({
-            text: `Soal No. ${safeStr(q.number)} (${safeStr(q.type || 'PG').toUpperCase()}) - Kunci: `,
+            text: `Soal No. ${safeStr(q.number)} (${typeLabel}) - Kunci: `,
             bold: true,
             font: 'Times New Roman',
             size: 21,
@@ -473,6 +621,7 @@ export async function exportExamToDocx(exam: ExamData) {
   const kisiRows = [kisiHeaderRow];
 
   questions.forEach((q, idx) => {
+    const typeLabel = q.type === 'pg' ? 'PG' : q.type === 'isian' ? 'ISIAN' : 'URAIAN';
     kisiRows.push(
       new TableRow({
         children: [
@@ -522,7 +671,7 @@ export async function exportExamToDocx(exam: ExamData) {
                 alignment: AlignmentType.CENTER,
                 children: [
                   new TextRun({
-                    text: `${safeStr(q.type || 'PG').toUpperCase()} (No. ${safeStr(q.number)})`,
+                    text: `${typeLabel} (No. ${safeStr(q.number)})`,
                     font: 'Times New Roman',
                   }),
                 ],

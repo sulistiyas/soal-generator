@@ -8,7 +8,7 @@ export type ExamCategory =
   | 'sas'      // Sumatif Akhir Semester / PAS / UAS
   | 'us';      // Ujian Sekolah / Asesmen Akhir Jenjang
 
-export type QuestionType = 'pg' | 'pg_kompleks' | 'menjodohkan' | 'isian' | 'uraian';
+export type QuestionType = 'pg' | 'pg_kompleks' | 'menjodohkan' | 'isian' | 'uraian' | 'essay';
 
 export type CognitiveLevel = 'C1' | 'C2' | 'C3' | 'C4' | 'C5' | 'C6' | 'LOTS' | 'MOTS' | 'HOTS';
 
@@ -23,6 +23,9 @@ export interface QuestionItem {
   type: QuestionType;
   stimulus?: string; // Teks pengantar / bacaan / studi kasus
   question: string;
+  imageSvg?: string; // Kode SVG diagram visual (terutama untuk Matematika / IPA / Geometri)
+  imageUrl?: string; // URL gambar atau Base64 data URL
+  imageCaption?: string; // Keterangan gambar (misal: "Gambar 1. Kubus ABCD.EFGH")
   options?: QuestionOption[]; // Khusus PG
   correctAnswer: string; // Misal 'A' atau uraian kunci jawaban
   explanation: string; // Pembahasan detail
@@ -111,6 +114,7 @@ export interface ExamGenerationRequest {
   topic: string;
   specificMaterial?: string;
   pgCount: number;
+  isianCount: number;
   essayCount: number;
   difficultyRatio: {
     lots: number;
