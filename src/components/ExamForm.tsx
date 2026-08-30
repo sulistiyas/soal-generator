@@ -70,6 +70,7 @@ export const ExamForm: React.FC<ExamFormProps> = ({
   const [selectedSubPreset, setSelectedSubPreset] = useState(initialSub);
 
   const [pgCount, setPgCount] = useState(10);
+  const [isianCount, setIsianCount] = useState(5);
   const [essayCount, setEssayCount] = useState(3);
   const [difficulty, setDifficulty] = useState<'seimbang' | 'hots' | 'mudah'>('seimbang');
   const [additionalInstructions] = useState('');
@@ -178,6 +179,7 @@ export const ExamForm: React.FC<ExamFormProps> = ({
       topic,
       specificMaterial,
       pgCount,
+      isianCount,
       essayCount,
       difficultyRatio,
       additionalInstructions,
@@ -506,10 +508,10 @@ export const ExamForm: React.FC<ExamFormProps> = ({
           <span>3. Komposisi & Karakteristik Soal</span>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           <div>
             <label className="block text-xs font-semibold text-slate-700 mb-1.5">
-              Jumlah Pilihan Ganda (PG)
+              1. Pilihan Ganda (PG)
             </label>
             <input
               type="number"
@@ -526,7 +528,24 @@ export const ExamForm: React.FC<ExamFormProps> = ({
 
           <div>
             <label className="block text-xs font-semibold text-slate-700 mb-1.5">
-              Jumlah Soal Uraian / Essay
+              2. Isian Singkat
+            </label>
+            <input
+              type="number"
+              min={0}
+              max={30}
+              value={isianCount}
+              onChange={(e) => setIsianCount(Number(e.target.value))}
+              className="w-full text-sm px-3.5 py-2 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
+            />
+            <span className="text-[11px] text-slate-500 mt-1 block">
+              Jawaban singkat / istilah pasti
+            </span>
+          </div>
+
+          <div>
+            <label className="block text-xs font-semibold text-slate-700 mb-1.5">
+              3. Uraian / Essay
             </label>
             <input
               type="number"
@@ -536,7 +555,9 @@ export const ExamForm: React.FC<ExamFormProps> = ({
               onChange={(e) => setEssayCount(Number(e.target.value))}
               className="w-full text-sm px-3.5 py-2 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
             />
-            <span className="text-[11px] text-slate-500 mt-1 block">Dilengkapi rubrik penskoran</span>
+            <span className="text-[11px] text-slate-500 mt-1 block">
+              Jawaban panjang & rubrik skor
+            </span>
           </div>
 
           <div>
@@ -552,6 +573,9 @@ export const ExamForm: React.FC<ExamFormProps> = ({
               <option value="hots">Fokus HOTS / AKM (50% Penalaran Tinggi)</option>
               <option value="mudah">Remedial / Dasar (60% LOTS C1-C2)</option>
             </select>
+            <span className="text-[11px] text-slate-500 mt-1 block">
+              Distribusi level kognitif
+            </span>
           </div>
         </div>
       </div>

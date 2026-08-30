@@ -18,11 +18,11 @@ interface GeneratingModalProps {
 }
 
 const GENERATION_STEPS = [
-  { id: 1, label: 'Menghubungkan ke AI Engine & Analisis Kurikulum', threshold: 0 },
-  { id: 2, label: 'Merancang Stimulus Bacaan & Butir Soal', threshold: 3 },
-  { id: 3, label: 'Mengukur Distribusi Kognitif (LOTS / MOTS / HOTS)', threshold: 6 },
-  { id: 4, label: 'Menyusun Kunci Jawaban & Pembahasan Lengkap', threshold: 10 },
-  { id: 5, label: 'Membuat Matriks Kisi-Kisi & Rubrik Penskoran', threshold: 14 },
+  { id: 1, label: 'Menghubungkan ke AI Engine & Analisis Kurikulum', ratio: 0 },
+  { id: 2, label: 'Merancang Stimulus Bacaan & Butir Soal', ratio: 0.2 },
+  { id: 3, label: 'Mengukur Distribusi Kognitif (LOTS / MOTS / HOTS)', ratio: 0.45 },
+  { id: 4, label: 'Menyusun Kunci Jawaban & Pembahasan Lengkap', ratio: 0.7 },
+  { id: 5, label: 'Membuat Matriks Kisi-Kisi & Rubrik Penskoran', ratio: 0.9 },
 ];
 
 const ROTATING_TIPS = [
@@ -34,7 +34,7 @@ const ROTATING_TIPS = [
   'Soal uraian dilengkapi panduan penskoran objektif untuk mempermudah koreksi guru.',
 ];
 
-function getEstimatedTime(providerId?: AIProviderId, totalQuestions: number = 10): { min: number; max: number; text: string } {
+function getEstimatedTime(providerId?: AIProviderId, totalQuestions: number = 10): { min: number; max: number } {
   let min = 7;
   let max = 14;
 
@@ -70,7 +70,7 @@ function getEstimatedTime(providerId?: AIProviderId, totalQuestions: number = 10
     max = Math.max(6, max - 3);
   }
 
-  return { min, max, text: `~${min} - ${max} detik` };
+  return { min, max };
 }
 
 export const GeneratingModal: React.FC<GeneratingModalProps> = ({ isOpen, requestData }) => {
@@ -105,13 +105,15 @@ export const GeneratingModal: React.FC<GeneratingModalProps> = ({ isOpen, reques
 
   if (!isOpen || !requestData) return null;
 
-  const totalQuestions = (requestData.pgCount || 0) + (requestData.essayCount || 0);
+  const totalQuestions = (requestData.pgCount || 0) + (requestData.isianCount || 0) + (requestData.essayCount || 0);
   const provider = AI_PROVIDERS.find((p) => p.id === requestData.aiProvider) || AI_PROVIDERS[0];
-  const estimate = getEstimatedTime(requestData.aiProvider, totalQuestions);
+  const initialEstimate = getEstimatedTime(requestData.aiProvider, totalQuestions);
 
-  // Calculate realistic progress percentage advancing smoothly towards 95%
-  const avgEstimate = (estimate.min + estimate.max) / 2;
-  const progressPercent = Math.min(95, Math.round((elapsedSeconds / (avgEstimate * 1.15)) * 90) + 5);
+  // Dynamic estimate: when elapsedSeconds exceeds initial max, dynamically adjust estimate to match running time
+  const hasExceededEstimate = elapsedSeconds > initialEstimate.max;
+  const buffer = Math.max(4, Math.round((initialEstimate.max - initialEstimate.min) * 0.5));
+  const currentEstimateMin = hasExceededEstimate ? elapsedSeconds : initialEstimate.min;
+  const currentEstimateMax = hasExceededEstimate ? elapsedSeconds + buffer : initialEstimate.max;
 
   // Format seconds as MM:SS
   const formatTime = (secs: number) => {
@@ -119,6 +121,20 @@ export const GeneratingModal: React.FC<GeneratingModalProps> = ({ isOpen, reques
     const s = secs % 60;
     return `${m > 0 ? `${m}m ` : ''}${s} detik`;
   };
+
+  const formatEstimateRange = (minSecs: number, maxSecs: number) => {
+    if (maxSecs < 60) {
+      return `~${minSecs} - ${maxSecs} detik`;
+    }
+    return `~${formatTime(minSecs)} - ${formatTime(maxSecs)}`;
+  };
+
+  const estimateDisplay = formatEstimateRange(currentEstimateMin, currentEstimateMax);
+
+  // Smooth realistic progress percentage advancing gracefully towards 98%
+  const progressPercent = hasExceededEstimate
+    ? Math.min(98, 90 + Math.min(8, Math.floor((elapsedSeconds - initialEstimate.max) * 0.4)))
+    : Math.min(90, Math.round((elapsedSeconds / (initialEstimate.max * 1.1)) * 85) + 5);
 
   return (
     <div className="fixed inset-0 z-50 overflow-y-auto p-3 sm:p-4 md:p-6 flex min-h-screen items-center justify-center bg-slate-950/70 backdrop-blur-md transition-all">
@@ -151,7 +167,7 @@ export const GeneratingModal: React.FC<GeneratingModalProps> = ({ isOpen, reques
           </div>
         </div>
 
-        {/* Info Cards: Waktu Berjalan & Estimasi Waktu */}
+        {/* Info Cards: Waktu Berjalan & Estimasi Selesai */}
         <div className="grid grid-cols-2 gap-2.5 sm:gap-3">
           <div className="bg-slate-50/90 border border-slate-200/80 rounded-2xl p-2.5 sm:p-3 text-center space-y-0.5">
             <div className="flex items-center justify-center gap-1 text-[10.5px] font-semibold text-slate-500 uppercase tracking-wide">
@@ -165,11 +181,11 @@ export const GeneratingModal: React.FC<GeneratingModalProps> = ({ isOpen, reques
 
           <div className="bg-blue-50/60 border border-blue-100 rounded-2xl p-2.5 sm:p-3 text-center space-y-0.5">
             <div className="flex items-center justify-center gap-1 text-[10.5px] font-semibold text-blue-700 uppercase tracking-wide">
-              <Zap className="w-3 h-3 text-amber-500 fill-amber-500" />
-              <span>Estimasi Waktu</span>
+              <Zap className={`w-3 h-3 ${hasExceededEstimate ? 'text-amber-600 animate-pulse' : 'text-amber-500'} fill-amber-500`} />
+              <span>Estimasi Selesai</span>
             </div>
-            <div className="text-base sm:text-lg font-extrabold text-blue-900 font-mono">
-              {estimate.text}
+            <div className="text-base sm:text-lg font-extrabold text-blue-900 font-mono transition-all duration-300">
+              {estimateDisplay}
             </div>
           </div>
         </div>
@@ -196,9 +212,17 @@ export const GeneratingModal: React.FC<GeneratingModalProps> = ({ isOpen, reques
           </div>
 
           <div className="space-y-1.5 pt-0.5">
-            {GENERATION_STEPS.map((step) => {
-              const isDone = elapsedSeconds > step.threshold + 3;
-              const isCurrent = elapsedSeconds >= step.threshold && !isDone;
+            {GENERATION_STEPS.map((step, index) => {
+              const stepThreshold = Math.round(initialEstimate.max * step.ratio);
+              const nextThreshold =
+                index < GENERATION_STEPS.length - 1
+                  ? Math.round(initialEstimate.max * GENERATION_STEPS[index + 1].ratio)
+                  : Infinity;
+              const isDone = index < GENERATION_STEPS.length - 1 ? elapsedSeconds >= nextThreshold : false;
+              const isCurrent =
+                index < GENERATION_STEPS.length - 1
+                  ? elapsedSeconds >= stepThreshold && elapsedSeconds < nextThreshold
+                  : elapsedSeconds >= stepThreshold;
 
               return (
                 <div key={step.id} className="flex items-center gap-2 text-[11.5px]">

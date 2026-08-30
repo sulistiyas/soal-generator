@@ -57,17 +57,20 @@ export const ExamPreview: React.FC<ExamPreviewProps> = ({ exam, onUpdateExam, on
 
     (exam.questions || []).forEach((q) => {
       plainText += `${q.number}. ${q.question || ''}\n`;
-      if (Array.isArray(q.options)) {
+      if (q.type === 'pg' && Array.isArray(q.options)) {
         q.options.forEach((opt) => {
           if (opt) plainText += `   ${opt.key}. ${opt.text || ''}\n`;
         });
+      } else if (q.type === 'isian') {
+        plainText += `   Jawaban: ........................................................\n`;
       }
       plainText += '\n';
     });
 
-    plainText += '\n--- KUNCI JAWABAN ---\n';
+    plainText += '\n--- KUNCI JAWABAN & PEMBAHASAN ---\n';
     (exam.questions || []).forEach((q) => {
-      plainText += `No ${q.number}: ${q.correctAnswer || '-'} - ${q.explanation || '-'}\n`;
+      const typeLabel = q.type === 'pg' ? 'PG' : q.type === 'isian' ? 'ISIAN' : 'URAIAN';
+      plainText += `No ${q.number} (${typeLabel}): ${q.correctAnswer || '-'} - ${q.explanation || '-'}\n`;
     });
 
     navigator.clipboard.writeText(plainText);
@@ -294,7 +297,19 @@ export const ExamPreview: React.FC<ExamPreviewProps> = ({ exam, onUpdateExam, on
                       <td className="p-2.5">{q.learningObjective || exam.topic}</td>
                       <td className="p-2.5">{q.indicator || `Menjawab soal materi ${exam.topic}`}</td>
                       <td className="p-2.5 text-center font-semibold">{q.cognitiveLevel}</td>
-                      <td className="p-2.5 text-center uppercase font-medium">{q.type}</td>
+                      <td className="p-2.5 text-center font-semibold text-[11px]">
+                        <span
+                          className={`px-2 py-0.5 rounded-md ${
+                            q.type === 'pg'
+                              ? 'bg-blue-50 text-blue-700 border border-blue-200'
+                              : q.type === 'isian'
+                              ? 'bg-amber-50 text-amber-800 border border-amber-200'
+                              : 'bg-purple-50 text-purple-800 border border-purple-200'
+                          }`}
+                        >
+                          {q.type === 'pg' ? 'PG' : q.type === 'isian' ? 'ISIAN' : 'URAIAN'}
+                        </span>
+                      </td>
                       <td className="p-2.5 text-center font-bold text-blue-600">{q.number}</td>
                     </tr>
                   ))}
