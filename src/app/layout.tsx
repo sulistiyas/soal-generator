@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import { Plus_Jakarta_Sans, JetBrains_Mono } from "next/font/google";
 import { siteConfig, getSiteUrl } from "@/lib/site-config";
 import { GoogleAnalytics } from "@/components/GoogleAnalytics";
+import { Analytics } from "@vercel/analytics/next";
 import "./globals.css";
 
 const plusJakarta = Plus_Jakarta_Sans({
@@ -150,6 +151,7 @@ export default function RootLayout({
       >
         <GoogleAnalytics />
         {children}
+        <Analytics />
       </body>
     </html>
   );
