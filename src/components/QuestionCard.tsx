@@ -90,7 +90,7 @@ export const QuestionCard: React.FC<QuestionCardProps> = ({
               onChange={(e) => setStimulus(e.target.value)}
               placeholder="Teks pengantar atau stimulus bacaan (opsional)..."
               rows={2}
-              className="w-full text-xs p-2 rounded-lg border border-slate-300 focus:outline-none focus:ring-1 focus:ring-blue-500"
+              className="w-full text-base sm:text-xs p-2.5 rounded-lg border border-slate-300 focus:outline-none focus:ring-1 focus:ring-blue-500"
             />
           ) : (
             <p className="italic leading-relaxed whitespace-pre-wrap">{question.stimulus}</p>
@@ -105,7 +105,7 @@ export const QuestionCard: React.FC<QuestionCardProps> = ({
             value={text}
             onChange={(e) => setText(e.target.value)}
             rows={3}
-            className="w-full text-sm p-2.5 rounded-lg border border-slate-300 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
+            className="w-full text-base sm:text-sm p-2.5 rounded-lg border border-slate-300 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
           />
         ) : (
           <p className="whitespace-pre-wrap">{question.question}</p>
@@ -122,10 +122,10 @@ export const QuestionCard: React.FC<QuestionCardProps> = ({
             return (
               <div
                 key={opt.key}
-                className={`flex items-start gap-3 p-3 rounded-xl border text-sm transition-all ${
+                className={`min-h-[44px] flex items-start gap-3 p-3 rounded-xl border text-sm transition-all ${
                   showAnswer && isCorrect
                     ? 'bg-emerald-50/80 border-emerald-300 text-emerald-950 font-medium'
-                    : 'bg-white border-slate-200/80 text-slate-700 hover:bg-slate-50/60'
+                    : 'bg-white border-slate-200/80 text-slate-700 hover:bg-slate-50/60 active:bg-slate-100'
                 }`}
               >
                 <span
@@ -164,7 +164,7 @@ export const QuestionCard: React.FC<QuestionCardProps> = ({
               value={explanation}
               onChange={(e) => setExplanation(e.target.value)}
               rows={2}
-              className="w-full text-xs p-2 rounded-lg border border-slate-300 focus:outline-none focus:ring-1 focus:ring-blue-500"
+              className="w-full text-base sm:text-xs p-2.5 rounded-lg border border-slate-300 focus:outline-none focus:ring-1 focus:ring-blue-500"
             />
           ) : (
             <p className="text-slate-600 leading-relaxed pl-1">{question.explanation || '-'}</p>

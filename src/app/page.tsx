@@ -215,7 +215,15 @@ export default function HomePage() {
                 className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-2xl bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 text-white font-bold text-sm sm:text-base shadow-lg shadow-blue-500/25 hover:shadow-xl hover:scale-[1.02] transition-all cursor-pointer"
               >
                 <FileQuestion className="w-5 h-5 text-amber-300" />
-                <span>Buka Generator Soal AI (Aktif)</span>
+                <span>Generator Soal AI</span>
+                <ArrowRight className="w-4 h-4" />
+              </Link>
+              <Link
+                href="/tools/modul-ajar"
+                className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-2xl bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white font-bold text-sm sm:text-base shadow-lg shadow-purple-500/25 hover:shadow-xl hover:scale-[1.02] transition-all cursor-pointer"
+              >
+                <BookText className="w-5 h-5 text-amber-300" />
+                <span>Generator Modul Ajar & RPP</span>
                 <ArrowRight className="w-4 h-4" />
               </Link>
               <a
@@ -223,7 +231,7 @@ export default function HomePage() {
                 className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-2xl bg-white/10 hover:bg-white/15 backdrop-blur text-white font-semibold text-sm sm:text-base border border-white/20 transition-all cursor-pointer"
               >
                 <Compass className="w-4 h-4 text-blue-300" />
-                <span>Jelajahi Katalog Tools</span>
+                <span>Semua Tools</span>
               </a>
             </div>
           </div>
@@ -253,22 +261,22 @@ export default function HomePage() {
                 placeholder="Cari nama tool, tag, atau mapel..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full pl-10 pr-9 py-2.5 bg-white border border-slate-300 rounded-2xl text-xs sm:text-sm focus:outline-hidden focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all shadow-2xs placeholder:text-slate-400"
+                className="w-full pl-10 pr-9 py-2.5 bg-white border border-slate-300 rounded-2xl text-base sm:text-sm focus:outline-hidden focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all shadow-2xs placeholder:text-slate-400"
               />
               {searchQuery && (
                 <button
                   type="button"
                   onClick={() => setSearchQuery('')}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 p-0.5 text-slate-400 hover:text-slate-600 rounded-full"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 p-1 text-slate-400 hover:text-slate-600 rounded-full"
                 >
-                  <X className="w-3.5 h-3.5" />
+                  <X className="w-4 h-4" />
                 </button>
               )}
             </div>
           </div>
 
           {/* Interactive Category Filter Tabs */}
-          <div className="flex items-center gap-2 overflow-x-auto pb-2 scrollbar-none">
+          <div className="flex items-center gap-2 overflow-x-auto pb-2 no-scrollbar scroll-smooth">
             {CATEGORIES.map((cat) => {
               const isSelected = selectedCategory === cat.id;
               const count = categoryCounts[cat.id] || 0;
@@ -555,7 +563,7 @@ export default function HomePage() {
                       placeholder="Contoh: Ibu Rina, S.Pd."
                       value={requestName}
                       onChange={(e) => setRequestName(e.target.value)}
-                      className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs sm:text-sm focus:bg-white focus:ring-2 focus:ring-blue-500 focus:outline-hidden transition-all"
+                      className="w-full min-h-[44px] px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-base sm:text-sm focus:bg-white focus:ring-2 focus:ring-blue-500 focus:outline-hidden transition-all"
                     />
                   </div>
                   <div className="space-y-1.5">
@@ -567,7 +575,7 @@ export default function HomePage() {
                       placeholder="Contoh: Guru Matematika SMP / Wali Kelas SD"
                       value={requestRole}
                       onChange={(e) => setRequestRole(e.target.value)}
-                      className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs sm:text-sm focus:bg-white focus:ring-2 focus:ring-blue-500 focus:outline-hidden transition-all"
+                      className="w-full min-h-[44px] px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-base sm:text-sm focus:bg-white focus:ring-2 focus:ring-blue-500 focus:outline-hidden transition-all"
                     />
                   </div>
                 </div>
@@ -582,7 +590,7 @@ export default function HomePage() {
                     placeholder="Contoh: Pembuat Rubrik Praktikum IPA / Generator Soal AKM Literasi"
                     value={requestToolIdea}
                     onChange={(e) => setRequestToolIdea(e.target.value)}
-                    className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs sm:text-sm focus:bg-white focus:ring-2 focus:ring-blue-500 focus:outline-hidden transition-all"
+                    className="w-full min-h-[44px] px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-base sm:text-sm focus:bg-white focus:ring-2 focus:ring-blue-500 focus:outline-hidden transition-all"
                   />
                 </div>
 
@@ -595,29 +603,29 @@ export default function HomePage() {
                     placeholder="Contoh: Saya ingin tool yang bisa otomatis membuat format penilaian sikap dan keterampilan dengan skala 1-4 sesuai Kurikulum Merdeka..."
                     value={requestDescription}
                     onChange={(e) => setRequestDescription(e.target.value)}
-                    className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs sm:text-sm focus:bg-white focus:ring-2 focus:ring-blue-500 focus:outline-hidden transition-all resize-none"
+                    className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-base sm:text-sm focus:bg-white focus:ring-2 focus:ring-blue-500 focus:outline-hidden transition-all resize-none"
                   />
                 </div>
 
                 <div className="pt-2 flex items-center justify-between gap-4 flex-wrap">
                   <p className="text-[11px] text-slate-400 flex items-center gap-1">
-                    <HelpCircle className="w-3.5 h-3.5 text-slate-400" />
-                    Setiap usulan sangat berarti untuk perkembangan platform gratis ini.
+                    <HelpCircle className="w-3.5 h-3.5 text-slate-400 shrink-0" />
+                    <span>Setiap usulan sangat berarti untuk perkembangan platform ini.</span>
                   </p>
 
                   <button
                     type="submit"
                     disabled={isSubmitting}
-                    className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 text-white font-bold text-xs shadow-xs hover:shadow transition-all cursor-pointer disabled:cursor-not-allowed"
+                    className="w-full sm:w-auto min-h-[44px] inline-flex items-center justify-center gap-2 px-6 py-3 rounded-xl bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 text-white font-bold text-xs sm:text-sm shadow-xs hover:shadow transition-all cursor-pointer disabled:cursor-not-allowed"
                   >
                     {isSubmitting ? (
                       <>
-                        <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                        <Loader2 className="w-4 h-4 animate-spin" />
                         <span>Mengirimkan...</span>
                       </>
                     ) : (
                       <>
-                        <Send className="w-3.5 h-3.5" />
+                        <Send className="w-4 h-4" />
                         <span>Kirimkan Aspirasi</span>
                       </>
                     )}

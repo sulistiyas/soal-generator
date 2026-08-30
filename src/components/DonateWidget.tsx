@@ -72,17 +72,11 @@ export const DonateWidget: React.FC<DonateWidgetProps> = ({
   return (
     <>
       {/* 1. FLOATING BUTTON "Dukung Kami" */}
-      <div
-        className="fixed bottom-[26px] right-[26px] z-40 print:hidden"
-        style={{
-          bottom: '26px',
-          right: '26px',
-        }}
-      >
+      <div className="fixed bottom-4 right-4 sm:bottom-[26px] sm:right-[26px] z-40 print:hidden">
         <button
           type="button"
           onClick={() => setIsOpen(true)}
-          className="group flex items-center gap-2.5 px-4 py-2.5 sm:px-5 sm:py-3 rounded-full bg-[#1B2033] hover:bg-[#111422] active:bg-[#0D0F1A] text-white shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-0.5 active:translate-y-0 cursor-pointer border border-white/10"
+          className="group flex items-center gap-2.5 px-3.5 py-2.5 sm:px-5 sm:py-3 min-h-[44px] rounded-full bg-[#1B2033] hover:bg-[#111422] active:bg-[#0D0F1A] text-white shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-0.5 active:translate-y-0 cursor-pointer border border-white/10"
           title="Dukung EduSoal AI"
           aria-label="Buka popup donasi EduSoal AI"
         >

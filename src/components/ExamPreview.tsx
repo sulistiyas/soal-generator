@@ -84,9 +84,9 @@ export const ExamPreview: React.FC<ExamPreviewProps> = ({ exam, onUpdateExam, on
   return (
     <div className="space-y-6">
       {/* Action Toolbar Header */}
-      <div className="bg-white rounded-2xl p-4 sm:p-5 border border-slate-200/90 shadow-xs flex flex-wrap items-center justify-between gap-4 print:hidden">
+      <div className="bg-white rounded-2xl p-4 sm:p-5 border border-slate-200/90 shadow-xs flex flex-col md:flex-row items-stretch md:items-center justify-between gap-4 print:hidden">
         <div>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 flex-wrap">
             <h2 className="font-bold text-slate-900 text-base sm:text-lg">
               {exam.subject} - {exam.grade}
             </h2>
@@ -97,68 +97,70 @@ export const ExamPreview: React.FC<ExamPreviewProps> = ({ exam, onUpdateExam, on
           <p className="text-xs text-slate-500 mt-0.5">{exam.examTitle}</p>
         </div>
 
-        <div className="flex flex-wrap items-center gap-2">
+        <div className="flex flex-col sm:flex-row sm:flex-wrap items-stretch sm:items-center gap-2">
           <button
             type="button"
             onClick={handleExportDocx}
             disabled={isExporting}
-            className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-semibold text-xs shadow-sm hover:shadow transition-all cursor-pointer"
+            className="w-full sm:w-auto min-h-[44px] inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white font-semibold text-xs sm:text-sm shadow-sm hover:shadow transition-all cursor-pointer"
           >
             <Download className="w-4 h-4" />
             <span>{isExporting ? 'Memproses...' : 'Download Word (.docx)'}</span>
           </button>
 
-          <button
-            type="button"
-            onClick={handlePrint}
-            className="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 font-medium text-xs transition-colors cursor-pointer"
-          >
-            <Printer className="w-4 h-4" />
-            <span>Cetak / PDF</span>
-          </button>
+          <div className="grid grid-cols-3 sm:flex items-center gap-2">
+            <button
+              type="button"
+              onClick={handlePrint}
+              className="min-h-[42px] inline-flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 active:bg-slate-300 text-slate-800 font-medium text-xs transition-colors cursor-pointer"
+            >
+              <Printer className="w-4 h-4 text-slate-500" />
+              <span>Cetak</span>
+            </button>
 
-          <button
-            type="button"
-            onClick={handleCopyText}
-            className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 font-medium text-xs transition-colors cursor-pointer"
-          >
-            {copied ? <Check className="w-4 h-4 text-emerald-600" /> : <Copy className="w-4 h-4" />}
-            <span>{copied ? 'Tersalin!' : 'Salin Teks'}</span>
-          </button>
+            <button
+              type="button"
+              onClick={handleCopyText}
+              className="min-h-[42px] inline-flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 active:bg-slate-300 text-slate-800 font-medium text-xs transition-colors cursor-pointer"
+            >
+              {copied ? <Check className="w-4 h-4 text-emerald-600" /> : <Copy className="w-4 h-4 text-slate-500" />}
+              <span>{copied ? 'Tersalin!' : 'Salin'}</span>
+            </button>
 
-          <button
-            type="button"
-            onClick={onReset}
-            className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl text-slate-500 hover:text-slate-800 hover:bg-slate-100 text-xs transition-colors cursor-pointer"
-            title="Buat Soal Baru"
-          >
-            <RefreshCw className="w-3.5 h-3.5" />
-            <span>Buat Baru</span>
-          </button>
+            <button
+              type="button"
+              onClick={onReset}
+              className="min-h-[42px] inline-flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl text-slate-600 hover:text-slate-900 bg-slate-100 hover:bg-slate-200 active:bg-slate-300 text-xs transition-colors cursor-pointer"
+              title="Buat Soal Baru"
+            >
+              <RefreshCw className="w-3.5 h-3.5" />
+              <span>Baru</span>
+            </button>
+          </div>
         </div>
       </div>
 
       {/* Tabs Navigation */}
-      <div className="flex items-center gap-2 border-b border-slate-200 pb-px print:hidden">
+      <div className="flex items-center gap-1.5 sm:gap-2 border-b border-slate-200 pb-px print:hidden overflow-x-auto no-scrollbar scroll-smooth">
         <button
           type="button"
           onClick={() => setActiveTab('naskah')}
-          className={`flex items-center gap-2 px-4 py-2.5 text-xs font-semibold rounded-t-xl transition-all cursor-pointer ${
+          className={`min-h-[44px] flex items-center gap-2 px-3.5 sm:px-4 py-2.5 text-xs font-semibold rounded-t-xl transition-all cursor-pointer whitespace-nowrap ${
             activeTab === 'naskah'
-              ? 'bg-white text-blue-600 border-t-2 border-t-blue-600 border-x border-slate-200 shadow-xs'
+              ? 'bg-white text-blue-600 border-t-2 border-t-blue-600 border-x border-slate-200 shadow-xs font-bold'
               : 'text-slate-500 hover:text-slate-800 hover:bg-slate-100'
           }`}
         >
           <FileText className="w-4 h-4" />
-          <span>📝 Naskah Soal Siswa ({exam.questions.length})</span>
+          <span>📝 Naskah Soal ({exam.questions.length})</span>
         </button>
 
         <button
           type="button"
           onClick={() => setActiveTab('kunci')}
-          className={`flex items-center gap-2 px-4 py-2.5 text-xs font-semibold rounded-t-xl transition-all cursor-pointer ${
+          className={`min-h-[44px] flex items-center gap-2 px-3.5 sm:px-4 py-2.5 text-xs font-semibold rounded-t-xl transition-all cursor-pointer whitespace-nowrap ${
             activeTab === 'kunci'
-              ? 'bg-white text-emerald-600 border-t-2 border-t-emerald-600 border-x border-slate-200 shadow-xs'
+              ? 'bg-white text-emerald-600 border-t-2 border-t-emerald-600 border-x border-slate-200 shadow-xs font-bold'
               : 'text-slate-500 hover:text-slate-800 hover:bg-slate-100'
           }`}
         >
@@ -169,9 +171,9 @@ export const ExamPreview: React.FC<ExamPreviewProps> = ({ exam, onUpdateExam, on
         <button
           type="button"
           onClick={() => setActiveTab('kisi')}
-          className={`flex items-center gap-2 px-4 py-2.5 text-xs font-semibold rounded-t-xl transition-all cursor-pointer ${
+          className={`min-h-[44px] flex items-center gap-2 px-3.5 sm:px-4 py-2.5 text-xs font-semibold rounded-t-xl transition-all cursor-pointer whitespace-nowrap ${
             activeTab === 'kisi'
-              ? 'bg-white text-indigo-600 border-t-2 border-t-indigo-600 border-x border-slate-200 shadow-xs'
+              ? 'bg-white text-indigo-600 border-t-2 border-t-indigo-600 border-x border-slate-200 shadow-xs font-bold'
               : 'text-slate-500 hover:text-slate-800 hover:bg-slate-100'
           }`}
         >
@@ -183,10 +185,9 @@ export const ExamPreview: React.FC<ExamPreviewProps> = ({ exam, onUpdateExam, on
       {/* ================= TAB 1: NASKAH SOAL SISWA ================= */}
       {activeTab === 'naskah' && (
         <div className="space-y-6">
-          {/* Header Cetak Standar Naskah Ujian (Kop Surat) */}
-          <div className="bg-white rounded-2xl p-6 sm:p-8 border border-slate-200/90 shadow-xs space-y-4">
+          <div className="bg-white rounded-2xl p-4 sm:p-8 border border-slate-200/90 shadow-xs space-y-4">
             <div className="text-center border-b-2 border-slate-900 pb-4 space-y-1">
-              <h1 className="font-extrabold text-lg sm:text-xl text-slate-900 tracking-wide uppercase">
+              <h1 className="font-extrabold text-base sm:text-xl text-slate-900 tracking-wide uppercase">
                 {exam.schoolName || 'NAMA SEKOLAH'}
               </h1>
               <h2 className="font-bold text-sm sm:text-base text-slate-800">{exam.examTitle}</h2>
@@ -195,39 +196,20 @@ export const ExamPreview: React.FC<ExamPreviewProps> = ({ exam, onUpdateExam, on
               </p>
             </div>
 
-            {/* Identitas Ujian */}
-            <div className="grid grid-cols-2 text-xs text-slate-800 py-2 border-b border-slate-200">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs text-slate-800 py-2 border-b border-slate-200">
               <div className="space-y-1">
-                <div>
-                  <span className="font-bold inline-block w-28">Mata Pelajaran</span>: {exam.subject}
-                </div>
-                <div>
-                  <span className="font-bold inline-block w-28">Kelas / Fase</span>: {exam.grade}
-                </div>
+                <p><strong>Mata Pelajaran:</strong> {exam.subject}</p>
+                <p><strong>Kelas / Fase:</strong> {exam.grade}</p>
+                <p><strong>Kurikulum:</strong> {exam.curriculum}</p>
               </div>
               <div className="space-y-1">
-                <div>
-                  <span className="font-bold inline-block w-28">Alokasi Waktu</span>: {exam.durationMinutes} Menit
-                </div>
-                <div>
-                  <span className="font-bold inline-block w-28">Hari, Tanggal</span>: ........................................
-                </div>
+                <p><strong>Hari / Tanggal:</strong> .....................................</p>
+                <p><strong>Alokasi Waktu:</strong> {exam.durationMinutes} Menit</p>
+                <p><strong>Nama Peserta:</strong> .....................................</p>
               </div>
-            </div>
-
-            {/* Petunjuk Pengerjaan */}
-            <div className="bg-slate-50 p-4 rounded-xl text-xs text-slate-700 space-y-1">
-              <span className="font-bold underline block mb-1">PETUNJUK UMUM:</span>
-              {(exam.instructions || []).map((inst, i) => (
-                <div key={i} className="flex gap-2">
-                  <span>{i + 1}.</span>
-                  <span>{inst}</span>
-                </div>
-              ))}
             </div>
           </div>
 
-          {/* Daftar Soal */}
           <div className="space-y-4">
             {exam.questions.map((q) => (
               <QuestionCard
@@ -244,33 +226,75 @@ export const ExamPreview: React.FC<ExamPreviewProps> = ({ exam, onUpdateExam, on
       {/* ================= TAB 2: KUNCI JAWABAN & PEMBAHASAN ================= */}
       {activeTab === 'kunci' && (
         <div className="space-y-4">
-          <div className="bg-emerald-50 border border-emerald-200 p-4 rounded-2xl text-xs text-emerald-950 flex items-center justify-between">
-            <div>
-              <span className="font-bold text-sm block">Lembar Kunci Jawaban & Pembahasan Lengkap</span>
-              <span>Gunakan lembar ini sebagai pedoman koreksi nilai dan analisis butir soal.</span>
+          <div className="bg-white rounded-2xl p-4 sm:p-6 border border-slate-200/90 shadow-xs space-y-3">
+            <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+              <div>
+                <h3 className="font-bold text-slate-900 text-sm sm:text-base">
+                  Kunci Jawaban Singkat
+                </h3>
+                <p className="text-xs text-slate-500">Rekap cepat jawaban Pilihan Ganda</p>
+              </div>
             </div>
-            <span className="px-3 py-1 bg-emerald-600 text-white rounded-lg font-bold text-xs">
-              {exam.questions.length} Soal
-            </span>
+
+            <div className="grid grid-cols-4 sm:grid-cols-5 md:grid-cols-10 gap-2">
+              {exam.questions
+                .filter((q) => q.type === 'pg')
+                .map((q) => (
+                  <div
+                    key={q.id || q.number}
+                    className="p-2 rounded-xl bg-slate-50 border border-slate-200 text-center"
+                  >
+                    <span className="text-[10px] text-slate-400 block font-medium">No {q.number}</span>
+                    <span className="text-sm font-extrabold text-blue-600 uppercase">
+                      {q.correctAnswer}
+                    </span>
+                  </div>
+                ))}
+            </div>
           </div>
 
-          {exam.questions.map((q) => (
-            <QuestionCard
-              key={q.id || q.number}
-              question={q}
-              onUpdateQuestion={handleUpdateQuestion}
-              showAnswer={true}
-            />
-          ))}
+          <div className="space-y-4">
+            {exam.questions.map((q) => (
+              <div
+                key={q.id || q.number}
+                className="bg-white rounded-2xl p-4 sm:p-6 border border-slate-200/90 shadow-xs space-y-3"
+              >
+                <div className="flex items-center justify-between border-b border-slate-100 pb-2">
+                  <div className="flex items-center gap-2">
+                    <span className="font-bold text-slate-900 text-sm">Soal Nomor {q.number}</span>
+                    <span className="text-[10px] px-2 py-0.5 rounded-md bg-slate-100 text-slate-600 font-semibold uppercase">
+                      {q.type}
+                    </span>
+                  </div>
+                  <span className="text-xs font-bold text-emerald-600 bg-emerald-50 px-2.5 py-1 rounded-lg border border-emerald-200">
+                    Kunci: {q.correctAnswer}
+                  </span>
+                </div>
+
+                <div className="text-xs sm:text-sm text-slate-800 leading-relaxed">
+                  <p className="font-medium text-slate-500 text-xs mb-1">Pertanyaan:</p>
+                  <p>{q.stimulus && <span className="block italic text-slate-600 mb-1">{q.stimulus}</span>}</p>
+                  <p className="font-semibold">{q.question}</p>
+                </div>
+
+                <div className="pt-2 border-t border-slate-100 space-y-1 bg-emerald-50/40 p-3 rounded-xl border border-emerald-100">
+                  <p className="text-xs font-bold text-emerald-900 flex items-center gap-1.5">
+                    <Key className="w-3.5 h-3.5 text-emerald-700" />
+                    Pembahasan & Penjelasan:
+                  </p>
+                  <p className="text-xs text-slate-700 leading-relaxed">{q.explanation}</p>
+                </div>
+              </div>
+            ))}
+          </div>
         </div>
       )}
 
-      {/* ================= TAB 3: KISI-KISI SOAL & RUBRIK ================= */}
+      {/* ================= TAB 3: KISI-KISI & RUBRIK ================= */}
       {activeTab === 'kisi' && (
         <div className="space-y-6">
-          {/* Tabel Kisi-Kisi */}
-          <div className="bg-white rounded-2xl p-6 border border-slate-200/90 shadow-xs space-y-4 overflow-hidden">
-            <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+          <div className="bg-white rounded-2xl p-4 sm:p-6 border border-slate-200/90 shadow-xs space-y-4 overflow-hidden">
+            <div className="flex items-center justify-between border-b border-slate-100 pb-3 flex-wrap gap-2">
               <div>
                 <h3 className="font-bold text-slate-900 text-sm sm:text-base">
                   Matriks Kisi-Kisi Penulisan Soal
@@ -279,10 +303,11 @@ export const ExamPreview: React.FC<ExamPreviewProps> = ({ exam, onUpdateExam, on
                   Format standar instrumen penilaian (Capaian Pembelajaran, Indikator, & Level Kognitif)
                 </p>
               </div>
+              <span className="text-[11px] text-slate-400 sm:hidden">👉 Geser tabel</span>
             </div>
 
-            <div className="overflow-x-auto">
-              <table className="w-full text-left text-xs border border-slate-200 rounded-lg overflow-hidden">
+            <div className="overflow-x-auto thin-scrollbar pb-2">
+              <table className="w-full min-w-[620px] text-left text-xs border border-slate-200 rounded-lg overflow-hidden">
                 <thead className="bg-slate-100 text-slate-700 font-bold border-b border-slate-200">
                   <tr>
                     <th className="p-2.5 w-10 text-center">No</th>

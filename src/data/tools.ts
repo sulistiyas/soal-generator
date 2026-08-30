@@ -38,10 +38,10 @@ export const TEACHER_TOOLS: TeacherTool[] = [
     category: 'administrasi',
     categoryLabel: 'Administrasi Guru',
     iconName: 'BookText',
-    status: 'coming_soon',
-    tags: ['Kurikulum Merdeka', 'RPP 1 Lembar', 'CP & ATP', 'P5'],
+    status: 'active',
+    tags: ['Kurikulum Merdeka', 'RPP 1 Lembar', 'CP & ATP', 'P5', 'Multi-AI'],
     path: '/tools/modul-ajar',
-    badge: 'Segera Hadir',
+    badge: 'Siap Pakai',
     features: [
       'Struktur Modul Ajar Standar Kemendikbudristek',
       'Integrasi Dimensi Profil Pelajar Pancasila (P5)',

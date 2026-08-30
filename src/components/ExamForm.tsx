@@ -214,13 +214,13 @@ export const ExamForm: React.FC<ExamFormProps> = ({
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
       {/* 1. IDENTITAS SEKOLAH & TIPE UJIAN */}
-      <div className="bg-white rounded-2xl p-6 border border-slate-200/80 shadow-xs space-y-4">
+      <div className="bg-white rounded-2xl p-4 sm:p-6 border border-slate-200/80 shadow-xs space-y-4">
         <div className="flex items-center gap-2 pb-2 border-b border-slate-100 text-slate-800 font-semibold text-sm">
           <School className="w-4 h-4 text-blue-600" />
           <span>1. Identitas Sekolah & Jenis Ujian</span>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5 sm:gap-4">
           <div>
             <label className="block text-xs font-semibold text-slate-700 mb-1.5">
               Nama Sekolah / Madrasah
@@ -230,7 +230,7 @@ export const ExamForm: React.FC<ExamFormProps> = ({
               value={schoolName}
               onChange={(e) => setSchoolName(e.target.value)}
               placeholder="Contoh: SMP Negeri 1 Nusantara"
-              className="w-full text-sm px-3.5 py-2 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
+              className="w-full text-base sm:text-sm px-3.5 py-2.5 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 min-h-[44px]"
               required
             />
           </div>
@@ -244,7 +244,7 @@ export const ExamForm: React.FC<ExamFormProps> = ({
               value={academicYear}
               onChange={(e) => setAcademicYear(e.target.value)}
               placeholder="2025/2026"
-              className="w-full text-sm px-3.5 py-2 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
+              className="w-full text-base sm:text-sm px-3.5 py-2.5 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 min-h-[44px]"
               required
             />
           </div>
@@ -261,10 +261,10 @@ export const ExamForm: React.FC<ExamFormProps> = ({
                 key={lvl}
                 type="button"
                 onClick={() => handleLevelChange(lvl)}
-                className={`px-3.5 py-2.5 rounded-xl text-xs font-semibold border transition-all text-center cursor-pointer ${
+                className={`min-h-[44px] px-3.5 py-2.5 rounded-xl text-xs font-semibold border transition-all text-center cursor-pointer ${
                   level === lvl
                     ? 'bg-blue-600 text-white border-blue-600 shadow-sm shadow-blue-500/20'
-                    : 'bg-slate-50 text-slate-700 border-slate-200 hover:bg-slate-100'
+                    : 'bg-slate-50 text-slate-700 border-slate-200 hover:bg-slate-100 active:bg-slate-200'
                 }`}
               >
                 {EDUCATION_LEVELS[lvl].name.split(' ')[0]} ({lvl.toUpperCase()})
@@ -280,10 +280,10 @@ export const ExamForm: React.FC<ExamFormProps> = ({
               key={cat.id}
               type="button"
               onClick={() => handleCategoryChange(cat.id)}
-              className={`p-3 rounded-xl text-left border transition-all cursor-pointer ${
+              className={`min-h-[50px] p-3 rounded-xl text-left border transition-all cursor-pointer ${
                 examCategory === cat.id
-                  ? 'bg-blue-50/80 border-blue-500 text-blue-950 font-semibold'
-                  : 'bg-white border-slate-200 text-slate-700 hover:bg-slate-50'
+                  ? 'bg-blue-50/80 border-blue-500 text-blue-950 font-semibold ring-1 ring-blue-500/20'
+                  : 'bg-white border-slate-200 text-slate-700 hover:bg-slate-50 active:bg-slate-100'
               }`}
             >
               <div className="text-xs font-semibold">{cat.label}</div>
@@ -294,13 +294,13 @@ export const ExamForm: React.FC<ExamFormProps> = ({
       </div>
 
       {/* 2. KURIKULUM & MATERI PEMBELAJARAN */}
-      <div className="bg-white rounded-2xl p-6 border border-slate-200/80 shadow-xs space-y-4">
+      <div className="bg-white rounded-2xl p-4 sm:p-6 border border-slate-200/80 shadow-xs space-y-4">
         <div className="flex items-center gap-2 pb-2 border-b border-slate-100 text-slate-800 font-semibold text-sm">
           <BookOpen className="w-4 h-4 text-indigo-600" />
           <span>2. Kurikulum & Materi Pelajaran</span>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3.5 sm:gap-4">
           {/* Kurikulum */}
           <div>
             <label className="block text-xs font-semibold text-slate-700 mb-1.5">
@@ -309,7 +309,7 @@ export const ExamForm: React.FC<ExamFormProps> = ({
             <select
               value={curriculum}
               onChange={(e) => setCurriculum(e.target.value as CurriculumType)}
-              className="w-full text-sm px-3.5 py-2 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 bg-white"
+              className="w-full min-h-[44px] text-base sm:text-sm px-3.5 py-2.5 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 bg-white"
             >
               {CURRICULA.map((c) => (
                 <option key={c.id} value={c.id}>
@@ -327,7 +327,7 @@ export const ExamForm: React.FC<ExamFormProps> = ({
             <select
               value={grade}
               onChange={(e) => setGrade(e.target.value)}
-              className="w-full text-sm px-3.5 py-2 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 bg-white"
+              className="w-full min-h-[44px] text-base sm:text-sm px-3.5 py-2.5 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 bg-white"
             >
               {levelInfo.grades.map((g) => (
                 <option key={g.id} value={`${g.name} (${g.phase || ''})`.trim()}>
@@ -345,7 +345,7 @@ export const ExamForm: React.FC<ExamFormProps> = ({
             <select
               value={semester}
               onChange={(e) => setSemester(e.target.value)}
-              className="w-full text-sm px-3.5 py-2 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 bg-white"
+              className="w-full min-h-[44px] text-base sm:text-sm px-3.5 py-2.5 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 bg-white"
             >
               <option value="1 (Ganjil)">1 (Ganjil)</option>
               <option value="2 (Genap)">2 (Genap)</option>
@@ -353,17 +353,17 @@ export const ExamForm: React.FC<ExamFormProps> = ({
           </div>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5 sm:gap-4">
           {/* Mata Pelajaran */}
           <div>
             <label className="block text-xs font-semibold text-slate-700 mb-1.5 flex items-center justify-between">
               <span>Mata Pelajaran</span>
-              <span className="text-[10px] text-blue-600 font-normal">Mengubah pilihan bab & sub-materi</span>
+              <span className="text-[10px] text-blue-600 font-normal">Sesuai bab</span>
             </label>
             <select
               value={subject}
               onChange={(e) => handleSubjectChange(e.target.value)}
-              className="w-full text-sm px-3.5 py-2 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 bg-white"
+              className="w-full min-h-[44px] text-base sm:text-sm px-3.5 py-2.5 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 bg-white"
             >
               {levelInfo.subjects.map((sub) => (
                 <option key={sub} value={sub}>
@@ -386,19 +386,19 @@ export const ExamForm: React.FC<ExamFormProps> = ({
               step={5}
               value={durationMinutes}
               onChange={(e) => setDurationMinutes(Number(e.target.value))}
-              className="w-full text-sm px-3.5 py-2 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
+              className="w-full min-h-[44px] text-base sm:text-sm px-3.5 py-2.5 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
             />
           </div>
         </div>
 
         {/* Topik Utama / Bab */}
         <div className="space-y-2">
-          <div className="flex items-center justify-between">
+          <div className="flex items-center justify-between flex-wrap gap-1">
             <label className="block text-xs font-semibold text-slate-700">
               Topik Utama / Bab / Capaian Pembelajaran <span className="text-red-500">*</span>
             </label>
             <span className="text-[11px] text-blue-600 font-medium flex items-center gap-1">
-              <Layers className="w-3.5 h-3.5" /> Bab Sesuai Mapel: {subject.split('(')[0].trim()}
+              <Layers className="w-3.5 h-3.5" /> Bab: {subject.split('(')[0].trim()}
             </span>
           </div>
 
@@ -406,7 +406,7 @@ export const ExamForm: React.FC<ExamFormProps> = ({
           <select
             value={selectedTopicPreset}
             onChange={(e) => handleTopicPresetChange(e.target.value)}
-            className="w-full text-sm px-3.5 py-2.5 rounded-xl border border-blue-200 bg-blue-50/50 text-slate-800 font-medium focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all cursor-pointer"
+            className="w-full min-h-[44px] text-base sm:text-sm px-3.5 py-2.5 rounded-xl border border-blue-200 bg-blue-50/50 text-slate-800 font-medium focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all cursor-pointer"
           >
             <optgroup label={`📚 Contoh Bab Terpilih (${subject})`}>
               {topicSuggestions.map((item, idx) => (
@@ -428,7 +428,7 @@ export const ExamForm: React.FC<ExamFormProps> = ({
                 value={topic}
                 onChange={(e) => setTopic(e.target.value)}
                 placeholder="Tuliskan judul bab atau konsep kunci yang ingin diujikan..."
-                className="w-full text-sm px-3.5 py-2.5 rounded-xl border border-blue-300 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 text-slate-800 shadow-2xs"
+                className="w-full min-h-[44px] text-base sm:text-sm px-3.5 py-2.5 rounded-xl border border-blue-300 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 text-slate-800 shadow-2xs"
                 required
                 autoFocus
               />
@@ -445,7 +445,7 @@ export const ExamForm: React.FC<ExamFormProps> = ({
 
         {/* Materi Tambahan */}
         <div className="space-y-2">
-          <div className="flex items-center justify-between">
+          <div className="flex items-center justify-between flex-wrap gap-1">
             <label className="block text-xs font-semibold text-slate-700">
               Rincian Sub-Materi / Konteks Khusus (Opsional)
             </label>
@@ -458,7 +458,7 @@ export const ExamForm: React.FC<ExamFormProps> = ({
           <select
             value={selectedSubPreset}
             onChange={(e) => handleSubPresetChange(e.target.value)}
-            className="w-full text-sm px-3.5 py-2.5 rounded-xl border border-emerald-200 bg-emerald-50/50 text-slate-800 font-medium focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all cursor-pointer"
+            className="w-full min-h-[44px] text-base sm:text-sm px-3.5 py-2.5 rounded-xl border border-emerald-200 bg-emerald-50/50 text-slate-800 font-medium focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all cursor-pointer"
           >
             <option value="">-- Pilih Rincian Sub-Materi / Fokus --</option>
             {subMaterialSuggestions.length > 0 && (
@@ -484,7 +484,7 @@ export const ExamForm: React.FC<ExamFormProps> = ({
                 onChange={(e) => setSpecificMaterial(e.target.value)}
                 placeholder="Contoh: Fokuskan pada metode ilmiah, variabel penelitian, dan pengukuran..."
                 rows={2}
-                className="w-full text-sm px-3.5 py-2.5 rounded-xl border border-emerald-300 bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 text-slate-800 shadow-2xs"
+                className="w-full text-base sm:text-sm px-3.5 py-2.5 rounded-xl border border-emerald-300 bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 text-slate-800 shadow-2xs"
                 autoFocus
               />
               <p className="text-[11px] text-slate-500">
@@ -500,13 +500,13 @@ export const ExamForm: React.FC<ExamFormProps> = ({
       </div>
 
       {/* 3. KOMPOSISI & JUMLAH SOAL */}
-      <div className="bg-white rounded-2xl p-6 border border-slate-200/80 shadow-xs space-y-4">
+      <div className="bg-white rounded-2xl p-4 sm:p-6 border border-slate-200/80 shadow-xs space-y-4">
         <div className="flex items-center gap-2 pb-2 border-b border-slate-100 text-slate-800 font-semibold text-sm">
           <Sliders className="w-4 h-4 text-emerald-600" />
           <span>3. Komposisi & Karakteristik Soal</span>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3.5 sm:gap-4">
           <div>
             <label className="block text-xs font-semibold text-slate-700 mb-1.5">
               Jumlah Pilihan Ganda (PG)
@@ -517,7 +517,7 @@ export const ExamForm: React.FC<ExamFormProps> = ({
               max={50}
               value={pgCount}
               onChange={(e) => setPgCount(Number(e.target.value))}
-              className="w-full text-sm px-3.5 py-2 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
+              className="w-full min-h-[44px] text-base sm:text-sm px-3.5 py-2.5 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
             />
             <span className="text-[11px] text-slate-500 mt-1 block">
               Opsi: {levelInfo.optionCount === 4 ? 'A s/d D' : 'A s/d E'}
@@ -534,7 +534,7 @@ export const ExamForm: React.FC<ExamFormProps> = ({
               max={15}
               value={essayCount}
               onChange={(e) => setEssayCount(Number(e.target.value))}
-              className="w-full text-sm px-3.5 py-2 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
+              className="w-full min-h-[44px] text-base sm:text-sm px-3.5 py-2.5 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
             />
             <span className="text-[11px] text-slate-500 mt-1 block">Dilengkapi rubrik penskoran</span>
           </div>
@@ -546,7 +546,7 @@ export const ExamForm: React.FC<ExamFormProps> = ({
             <select
               value={difficulty}
               onChange={(e) => setDifficulty(e.target.value as 'seimbang' | 'hots' | 'mudah')}
-              className="w-full text-sm px-3.5 py-2 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 bg-white"
+              className="w-full min-h-[44px] text-base sm:text-sm px-3.5 py-2.5 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 bg-white"
             >
               <option value="seimbang">Seimbang (30% LOTS, 50% MOTS, 20% HOTS)</option>
               <option value="hots">Fokus HOTS / AKM (50% Penalaran Tinggi)</option>
@@ -557,13 +557,13 @@ export const ExamForm: React.FC<ExamFormProps> = ({
       </div>
 
       {/* Info AI Provider Box */}
-      <div className="rounded-2xl border border-slate-200 bg-white p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-2xs">
+      <div className="rounded-2xl border border-slate-200 bg-white p-3.5 sm:p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-2xs">
         <div className="flex items-center gap-3">
-          <div className="p-2.5 rounded-xl bg-slate-100">
+          <div className="p-2.5 rounded-xl bg-slate-100 shrink-0">
             {getProviderIcon(activeConfig.id)}
           </div>
-          <div>
-            <div className="flex items-center gap-2">
+          <div className="min-w-0">
+            <div className="flex items-center gap-2 flex-wrap">
               <span className="text-xs text-slate-500">AI Generator:</span>
               <span className="text-xs font-bold text-slate-900">
                 {activeConfig.name} ({activeProviderSettings?.model || activeConfig.defaultModel})
@@ -581,7 +581,7 @@ export const ExamForm: React.FC<ExamFormProps> = ({
         <button
           type="button"
           onClick={onOpenApiKeyModal}
-          className="inline-flex items-center justify-center gap-1.5 px-3.5 py-2 text-xs font-semibold text-slate-700 hover:text-blue-700 bg-slate-50 hover:bg-blue-50 border border-slate-200 hover:border-blue-200 rounded-xl transition-all cursor-pointer"
+          className="min-h-[40px] inline-flex items-center justify-center gap-1.5 px-3.5 py-2 text-xs font-semibold text-slate-700 hover:text-blue-700 bg-slate-50 hover:bg-blue-50 border border-slate-200 hover:border-blue-200 rounded-xl transition-all cursor-pointer"
         >
           <Settings2 className="w-3.5 h-3.5" />
           <span>Ganti AI / Atur Key</span>
@@ -593,7 +593,7 @@ export const ExamForm: React.FC<ExamFormProps> = ({
         <button
           type="submit"
           disabled={isLoading}
-          className="w-full py-4 px-6 rounded-2xl bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 text-white font-bold text-base shadow-lg shadow-blue-500/25 hover:shadow-xl hover:shadow-blue-500/35 hover:scale-[1.005] active:scale-[0.99] transition-all flex items-center justify-center gap-2.5 disabled:opacity-60 disabled:cursor-not-allowed cursor-pointer"
+          className="w-full min-h-[52px] py-3.5 sm:py-4 px-6 rounded-2xl bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 text-white font-bold text-sm sm:text-base shadow-lg shadow-blue-500/25 hover:shadow-xl hover:shadow-blue-500/35 active:scale-[0.99] transition-all flex items-center justify-center gap-2.5 disabled:opacity-60 disabled:cursor-not-allowed cursor-pointer"
         >
           {isLoading ? (
             <>
@@ -609,7 +609,7 @@ export const ExamForm: React.FC<ExamFormProps> = ({
         </button>
 
         {!hasKey && (
-          <div className="mt-3 p-3 rounded-xl bg-amber-50 border border-amber-200 flex items-center justify-between text-xs text-amber-800">
+          <div className="mt-3 p-3 rounded-xl bg-amber-50 border border-amber-200 flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-xs text-amber-800">
             <div className="flex items-center gap-2">
               <AlertCircle className="w-4 h-4 text-amber-600 shrink-0" />
               <span>
@@ -619,7 +619,7 @@ export const ExamForm: React.FC<ExamFormProps> = ({
             <button
               type="button"
               onClick={onOpenApiKeyModal}
-              className="font-bold underline text-amber-900 hover:text-black cursor-pointer ml-2"
+              className="font-bold underline text-amber-900 hover:text-black cursor-pointer text-left sm:text-right"
             >
               Atur API Key Gratis
             </button>

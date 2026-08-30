@@ -236,7 +236,7 @@ export const ApiKeyModal: React.FC<ApiKeyModalProps> = ({
                     : 'custom'
                 }
                 onChange={(e) => handleModelChange(e.target.value)}
-                className="w-full text-xs sm:text-sm px-3.5 py-2.5 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 bg-white font-medium"
+                className="w-full min-h-[44px] text-base sm:text-sm px-3.5 py-2.5 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 bg-white font-medium"
               >
                 {activeConfig.availableModels.map((m) => (
                   <option key={m.id} value={m.id}>
@@ -256,7 +256,7 @@ export const ApiKeyModal: React.FC<ApiKeyModalProps> = ({
                     value={activeProviderSettings.model === 'custom' ? '' : activeProviderSettings.model}
                     onChange={(e) => handleModelChange(e.target.value || 'custom')}
                     placeholder="Contoh: qwen2.5-coder:7b"
-                    className="w-full px-3 py-2 text-xs sm:text-sm rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 font-mono bg-white"
+                    className="w-full min-h-[44px] px-3.5 py-2 text-base sm:text-sm rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 font-mono bg-white"
                   />
                 </div>
               )}
@@ -279,12 +279,12 @@ export const ApiKeyModal: React.FC<ApiKeyModalProps> = ({
                     value={activeProviderSettings.apiKey || ''}
                     onChange={(e) => handleApiKeyChange(e.target.value)}
                     placeholder={activeConfig.apiKeyPlaceholder || 'Masukkan API Key...'}
-                    className="w-full px-3.5 py-2.5 pr-10 text-xs sm:text-sm rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 font-mono bg-white"
+                    className="w-full min-h-[44px] px-3.5 py-2.5 pr-10 text-base sm:text-sm rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 font-mono bg-white"
                   />
                   <button
                     type="button"
                     onClick={() => setShowKey(!showKey)}
-                    className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 p-1 cursor-pointer"
+                    className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 p-2 cursor-pointer"
                   >
                     {showKey ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                   </button>
@@ -300,7 +300,7 @@ export const ApiKeyModal: React.FC<ApiKeyModalProps> = ({
                   value={activeProviderSettings.customBaseUrl || activeConfig.defaultBaseUrl || ''}
                   onChange={(e) => handleBaseUrlChange(e.target.value)}
                   placeholder="http://localhost:11434/v1"
-                  className="w-full px-3.5 py-2.5 text-xs sm:text-sm rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 font-mono bg-white"
+                  className="w-full min-h-[44px] px-3.5 py-2.5 text-base sm:text-sm rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 font-mono bg-white"
                 />
                 <p className="mt-1 text-[11px] text-slate-500">
                   Tidak memerlukan API Key. Pastikan Ollama sudah berjalan di laptop/komputer Anda.
@@ -338,8 +338,8 @@ export const ApiKeyModal: React.FC<ApiKeyModalProps> = ({
         </div>
 
         {/* Footer Actions */}
-        <div className="px-6 py-4 border-t border-slate-100 bg-slate-50/50 flex items-center justify-between">
-          <div className="text-xs text-slate-500">
+        <div className="px-4 sm:px-6 py-3.5 sm:py-4 border-t border-slate-100 bg-slate-50/50 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
+          <div className="text-xs text-slate-500 truncate">
             Provider Aktif:{' '}
             <strong className="text-slate-800">
               {AI_PROVIDERS.find((p) => p.id === currentSettings.activeProvider)?.name}
@@ -349,14 +349,14 @@ export const ApiKeyModal: React.FC<ApiKeyModalProps> = ({
             <button
               type="button"
               onClick={onClose}
-              className="px-4 py-2 text-xs font-medium text-slate-600 hover:text-slate-800 rounded-xl hover:bg-slate-200/60 transition-colors cursor-pointer"
+              className="flex-1 sm:flex-initial min-h-[42px] px-4 py-2 text-xs font-medium text-slate-600 hover:text-slate-800 rounded-xl hover:bg-slate-200/60 transition-colors cursor-pointer text-center"
             >
               Tutup
             </button>
             <button
               type="button"
               onClick={handleSave}
-              className="px-5 py-2 text-xs font-semibold text-white bg-blue-600 hover:bg-blue-700 rounded-xl shadow-sm hover:shadow transition-all flex items-center gap-1.5 cursor-pointer"
+              className="flex-1 sm:flex-initial min-h-[42px] px-5 py-2 text-xs font-semibold text-white bg-blue-600 hover:bg-blue-700 active:bg-blue-800 rounded-xl shadow-sm hover:shadow transition-all flex items-center justify-center gap-1.5 cursor-pointer"
             >
               {savedSuccess ? (
                 <>

@@ -353,14 +353,14 @@ export default function GeneratedExamPage() {
               </div>
 
               {/* Action Buttons: Salin Link & Buat Soal Baru */}
-              <div className="flex items-center gap-2.5 flex-wrap shrink-0">
+              <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 w-full sm:w-auto shrink-0">
                 <button
                   type="button"
                   onClick={handleCopyLink}
-                  className={`inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-semibold border transition-all cursor-pointer ${
+                  className={`min-h-[40px] inline-flex items-center justify-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-semibold border transition-all cursor-pointer ${
                     copiedLink
                       ? 'bg-emerald-50 text-emerald-700 border-emerald-300 shadow-xs'
-                      : 'bg-slate-50 hover:bg-slate-100 text-slate-700 border-slate-200 hover:border-slate-300'
+                      : 'bg-slate-50 hover:bg-slate-100 active:bg-slate-200 text-slate-700 border-slate-200 hover:border-slate-300'
                   }`}
                   title="Salin link unik hasil generate soal ini"
                 >
@@ -379,7 +379,7 @@ export default function GeneratedExamPage() {
 
                 <Link
                   href="/tools/soal-generator"
-                  className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 text-white text-xs font-semibold shadow-xs hover:shadow transition-all cursor-pointer"
+                  className="min-h-[40px] inline-flex items-center justify-center gap-1.5 px-3.5 py-2 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 text-white text-xs font-semibold shadow-xs hover:shadow active:scale-[0.99] transition-all cursor-pointer"
                 >
                   <ArrowLeft className="w-4 h-4" />
                   <span>Buat Soal Baru</span>
