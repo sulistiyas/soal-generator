@@ -3,7 +3,7 @@ import { ExamData, ExamGenerationRequest } from '@/types/exam';
 export async function generateExamWithAnthropic(
   request: ExamGenerationRequest,
   apiKey: string,
-  model: string = 'claude-3-7-sonnet-20250219',
+  model: string = 'claude-sonnet-5',
   baseUrl: string = 'https://api.anthropic.com/v1'
 ): Promise<ExamData> {
   if (!apiKey) {
@@ -146,7 +146,7 @@ Struktur JSON yang WAJIB dihasilkan:
   const endpoint = cleanBase.endsWith('/messages') ? cleanBase : `${cleanBase}/messages`;
 
   const payload: Record<string, unknown> = {
-    model: model || 'claude-3-7-sonnet-20250219',
+    model: model || 'claude-sonnet-5',
     max_tokens: 8192,
     system: systemInstruction,
     messages: [{ role: 'user', content: userPrompt }],

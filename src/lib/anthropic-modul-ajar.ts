@@ -3,7 +3,7 @@ import { ModulAjarData, ModulAjarGenerationRequest } from '@/types/modul-ajar';
 export async function generateModulAjarWithAnthropic(
   request: ModulAjarGenerationRequest,
   apiKey: string,
-  modelName: string = 'claude-3-5-sonnet-20241022',
+  modelName: string = 'claude-sonnet-5',
   baseUrl: string = 'https://api.anthropic.com/v1'
 ): Promise<ModulAjarData> {
   if (!apiKey) {

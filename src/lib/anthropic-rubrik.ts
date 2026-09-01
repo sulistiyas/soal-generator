@@ -3,7 +3,7 @@ import { KisiKisiRubrikData, KisiKisiRubrikGenerationRequest } from '@/types/rub
 export async function generateKisiKisiRubrikWithAnthropic(
   request: KisiKisiRubrikGenerationRequest,
   apiKey: string,
-  model: string = 'claude-3-7-sonnet-20250219',
+  model: string = 'claude-sonnet-5',
   baseUrl: string = 'https://api.anthropic.com/v1'
 ): Promise<KisiKisiRubrikData> {
   const getAssessmentLabel = (type: string) => {
