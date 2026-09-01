@@ -1,13 +1,79 @@
 'use client';
 
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useSyncExternalStore } from 'react';
 import Link from 'next/link';
 import { Navbar } from '@/components/Navbar';
 import { DonateWidget } from '@/components/DonateWidget';
+import { ApiKeyModal } from '@/components/ApiKeyModal';
 import { TEACHER_TOOLS, CATEGORIES } from '@/data/tools';
 import { TeacherTool, ToolCategory } from '@/types/tool';
+import { AI_PROVIDERS, DEFAULT_AI_SETTINGS } from '@/lib/constants';
+import { AIProviderId, UserAISettings } from '@/types/exam';
 import { openDonationModal } from '@/lib/donation';
 import { trackEvent } from '@/lib/analytics';
+
+function subscribeToAISettings(callback: () => void) {
+  if (typeof window === 'undefined') return () => {};
+  window.addEventListener('storage', callback);
+  window.addEventListener('edusoal_settings_updated', callback);
+  return () => {
+    window.removeEventListener('storage', callback);
+    window.removeEventListener('edusoal_settings_updated', callback);
+  };
+}
+
+function getAISettingsSnapshot(): string {
+  if (typeof window === 'undefined') return '';
+  return localStorage.getItem('edusoal_ai_settings') || '';
+}
+
+function getAISettingsServerSnapshot(): string {
+  return '';
+}
+
+function parseStoredSettings(rawJson: string): UserAISettings {
+  if (!rawJson) return DEFAULT_AI_SETTINGS;
+  try {
+    const parsed = JSON.parse(rawJson);
+    const activeProv: AIProviderId = AI_PROVIDERS.some((p) => p.id === parsed?.activeProvider)
+      ? parsed.activeProvider
+      : 'gemini';
+
+    const mergedProviders: Record<AIProviderId, { apiKey: string; model: string; customBaseUrl?: string }> = {
+      ...DEFAULT_AI_SETTINGS.providers,
+    };
+
+    for (const prov of AI_PROVIDERS) {
+      const savedProv = parsed?.providers?.[prov.id];
+      const availableModelIds = prov.availableModels.map((m) => m.id);
+      let model = savedProv?.model || prov.defaultModel;
+
+      if (!availableModelIds.includes(model) && model !== 'custom') {
+        if (prov.id === 'openrouter' && model.startsWith('google/gemini-')) {
+          model = prov.defaultModel;
+        } else if (prov.id === 'groq') {
+          model = prov.defaultModel;
+        } else if (prov.id !== 'ollama' && !model.includes(':')) {
+          model = prov.defaultModel;
+        }
+      }
+
+      mergedProviders[prov.id] = {
+        apiKey: savedProv?.apiKey || '',
+        model: model,
+        customBaseUrl: savedProv?.customBaseUrl || prov.defaultBaseUrl || '',
+      };
+    }
+
+    return {
+      activeProvider: activeProv,
+      providers: mergedProviders,
+    };
+  } catch (e) {
+    console.error('Failed to parse AI settings:', e);
+    return DEFAULT_AI_SETTINGS;
+  }
+}
 import {
   Sparkles,
   FileQuestion,
@@ -36,6 +102,15 @@ import {
 } from 'lucide-react';
 
 export default function HomePage() {
+  const storedJson = useSyncExternalStore(
+    subscribeToAISettings,
+    getAISettingsSnapshot,
+    getAISettingsServerSnapshot
+  );
+
+  const aiSettings = useMemo(() => parseStoredSettings(storedJson), [storedJson]);
+  const [isApiKeyModalOpen, setIsApiKeyModalOpen] = useState(false);
+
   const [selectedCategory, setSelectedCategory] = useState<ToolCategory>('all');
   const [searchQuery, setSearchQuery] = useState('');
   
@@ -46,6 +121,18 @@ export default function HomePage() {
   const [requestDescription, setRequestDescription] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
+
+  const handleSaveSettings = (newSettings: UserAISettings) => {
+    try {
+      localStorage.setItem('edusoal_ai_settings', JSON.stringify(newSettings));
+      if (newSettings.providers.gemini?.apiKey) {
+        localStorage.setItem('edusoal_gemini_api_key', newSettings.providers.gemini.apiKey);
+      }
+      window.dispatchEvent(new Event('edusoal_settings_updated'));
+    } catch (e) {
+      console.error('Failed to save AI settings:', e);
+    }
+  };
 
   // Filter tools based on category and search query
   const filteredTools = useMemo(() => {
@@ -158,7 +245,10 @@ export default function HomePage() {
   return (
     <div className="min-h-screen bg-slate-50 flex flex-col font-sans selection:bg-blue-600 selection:text-white">
       {/* Header Navigation */}
-      <Navbar />
+      <Navbar
+        aiSettings={aiSettings}
+        onOpenApiKeyModal={() => setIsApiKeyModalOpen(true)}
+      />
 
       <main className="flex-1 w-full space-y-16 pb-20">
         {/* HERO SECTION */}
@@ -257,6 +347,7 @@ export default function HomePage() {
             <div className="relative w-full md:w-80 shrink-0">
               <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
               <input
+                id="catalog-search-input"
                 type="text"
                 placeholder="Cari nama tool, tag, atau mapel..."
                 value={searchQuery}
@@ -700,6 +791,14 @@ export default function HomePage() {
 
       {/* Floating Donate Widget */}
       <DonateWidget />
+
+      {/* AI Provider Config Modal */}
+      <ApiKeyModal
+        isOpen={isApiKeyModalOpen}
+        onClose={() => setIsApiKeyModalOpen(false)}
+        aiSettings={aiSettings}
+        onSaveSettings={handleSaveSettings}
+      />
     </div>
   );
 }

@@ -221,13 +221,22 @@ Struktur JSON yang WAJIB dihasilkan:
       throw new Error(`Tidak ada konten respon yang diterima dari provider ${provider.toUpperCase()}.`);
     }
 
-    // Clean JSON content from possible markdown blocks
-    const cleanJson = rawContent
-      .trim()
+    // Clean JSON content from possible markdown blocks and reasoning think tags
+    let cleanJson = rawContent.trim();
+    // Remove thinking tags if present (e.g. from DeepSeek R1 models)
+    cleanJson = cleanJson.replace(/<think>[\s\S]*?<\/think>/gi, '').trim();
+    cleanJson = cleanJson
       .replace(/^```json\s*/i, '')
       .replace(/^```\s*/i, '')
       .replace(/```$/i, '')
       .trim();
+
+    // Extract outer JSON object if extra text exists
+    const firstBrace = cleanJson.indexOf('{');
+    const lastBrace = cleanJson.lastIndexOf('}');
+    if (firstBrace !== -1 && lastBrace !== -1 && lastBrace > firstBrace) {
+      cleanJson = cleanJson.substring(firstBrace, lastBrace + 1);
+    }
 
     const parsedExamData: ExamData = JSON.parse(cleanJson);
     return parsedExamData;

@@ -70,6 +70,8 @@ function parseStoredSettings(rawJson: string): UserAISettings {
       if (!availableModelIds.includes(model) && model !== 'custom') {
         if (prov.id === 'openrouter' && model.startsWith('google/gemini-')) {
           model = prov.defaultModel;
+        } else if (prov.id === 'groq') {
+          model = prov.defaultModel;
         } else if (prov.id !== 'ollama' && !model.includes(':')) {
           model = prov.defaultModel;
         }

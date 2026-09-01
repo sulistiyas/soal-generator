@@ -320,11 +320,18 @@ Buatkan data Modul Ajar di atas dengan detail lengkap, mendalam, dan disesuaikan
     throw new Error(`Model ${model} tidak mengembalikan respon.`);
   }
 
-  let cleanJson = rawContent;
-  if (cleanJson.startsWith('```json')) {
-    cleanJson = cleanJson.replace(/^```json\s*/, '').replace(/\s*```$/, '');
-  } else if (cleanJson.startsWith('```')) {
-    cleanJson = cleanJson.replace(/^```\s*/, '').replace(/\s*```$/, '');
+  let cleanJson = rawContent.trim();
+  cleanJson = cleanJson.replace(/<think>[\s\S]*?<\/think>/gi, '').trim();
+  cleanJson = cleanJson
+    .replace(/^```json\s*/i, '')
+    .replace(/^```\s*/i, '')
+    .replace(/\s*```$/i, '')
+    .trim();
+
+  const firstBrace = cleanJson.indexOf('{');
+  const lastBrace = cleanJson.lastIndexOf('}');
+  if (firstBrace !== -1 && lastBrace !== -1 && lastBrace > firstBrace) {
+    cleanJson = cleanJson.substring(firstBrace, lastBrace + 1);
   }
 
   try {

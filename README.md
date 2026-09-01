@@ -53,7 +53,7 @@ graph TD
     Hub --> Cat3[🎨 Kreatif & Kelas]
     
     Cat1 --> Tool1["✨ Generator Soal AI & Kisi-Kisi (Aktif)"]
-    Cat1 --> Tool2["⏳ Pembuat Kisi-Kisi & Rubrik (Coming Soon)"]
+    Cat1 --> Tool2["✨ Pembuat Kisi-Kisi & Rubrik (Aktif)"]
     
     Cat2 --> Tool3["✨ Generator Modul Ajar & RPP (Aktif)"]
     Cat2 --> Tool4["⏳ Generator Deskripsi Rapor (Coming Soon)"]
@@ -68,14 +68,20 @@ graph TD
 - **Visualisasi Geometri & Matematika**: Generator diagram SVG otomatis untuk bangun ruang, bangun datar, sudut, dan grafik fungsi.
 - **Ekspor Dokumen**: Naskah Soal Siswa, Kisi-Kisi, Kunci Jawaban, dan Rubrik Penskoran langsung ke format `.docx`.
 
-### 2. 📖 Generator Modul Ajar & RPP (`/tools/modul-ajar`) — *Siap Pakai*
+### 2. 📋 Pembuat Kisi-Kisi & Rubrik Penilaian (`/tools/rubrik-penilaian`) — *Siap Pakai*
+- **Format Standar Nasional**: Matriks kisi-kisi penulisan soal dengan rumusan indikator berkaidah ABCD (Audience, Behavior, Condition, Degree).
+- **Rubrik Analitik & Holistik**: 4 skala capaian operasional (*Sangat Baik / 4*, *Baik / 3*, *Cukup / 2*, *Perlu Bimbingan / 1*).
+- **Pedoman Penskoran Uraian**: Kunci jawaban dan rincian pembobotan poin langkah demi langkah.
+- **Interval KKTP & Tindak Lanjut**: Panduan kriteria ketercapaian dan intervensi guru (remedial/pengayaan) serta format blangko lembar nilai siswa.
+- **Ekspor Dokumen**: File Microsoft Word (.docx) siap cetak dan tanda tangan kepala sekolah/guru.
+
+### 3. 📖 Generator Modul Ajar & RPP (`/tools/modul-ajar`) — *Siap Pakai*
 - **Standar Kurikulum**: Sesuai kaidah Kurikulum Merdeka (Fase A s/d F) dan RPP 1 Lembar Kurikulum 2013.
 - **Komponen Lengkap**: Identitas, Capaian Pembelajaran (CP), Tujuan Pembelajaran (TP/ATP), Dimensi Profil Pelajar Pancasila (P5), Pemahaman Bermakna, Pertanyaan Pemantik, serta Kegiatan Pembelajaran Berdiferensiasi.
 - **Asesmen & Lampiran**: Asesmen diagnostik, formatif, sumatif, lembar refleksi guru & siswa, glosarium, dan daftar pustaka.
 - **Ekspor Dokumen**: Output dokumen Microsoft Word (.docx) dengan format kop resmi sekolah yang siap cetak.
 
-### 3. 🚀 Alat Bantu Dalam Pengembangan (Roadmap)
-- **Pembuat Kisi-Kisi & Rubrik Penilaian** (`/tools/rubrik-penilaian`): Matriks kisi-kisi dan rubrik penskoran analitik/holistik terpisah.
+### 4. 🚀 Alat Bantu Dalam Pengembangan (Roadmap)
 - **Generator Deskripsi Capaian e-Rapor** (`/tools/deskripsi-rapor`): Perumusan narasi nilai rapor positif & konstruktif untuk banyak siswa secara massal.
 - **Ide Ice Breaking & Game Interaktif** (`/tools/ice-breaking`): Kumpulan ide penyemangat dan permainan kelas interaktif tanpa persiapan rumit.
 - **Penyusun LKPD Siswa** (`/tools/lkpd-generator`): Lembar Kerja Peserta Didik berbasis inkuiri dan *Problem-Based Learning*.
