@@ -1,6 +1,7 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useSearchParams } from 'next/navigation';
 import {
   EducationLevel,
   CurriculumType,
@@ -37,6 +38,7 @@ import {
   ListTree,
   CheckCircle2,
   HelpCircle,
+  BookText,
 } from 'lucide-react';
 
 interface ExamFormProps {
@@ -52,6 +54,8 @@ export const ExamForm: React.FC<ExamFormProps> = ({
   aiSettings,
   onOpenApiKeyModal,
 }) => {
+  const searchParams = useSearchParams();
+
   // Hitung rentang tahun ajaran dinamis (5 tahun ke depan dari 1 tahun sebelum tahun sekarang)
   const currentYear = new Date().getFullYear();
   const startYear = currentYear - 1; // Misal 2026 -> 2025
@@ -86,8 +90,27 @@ export const ExamForm: React.FC<ExamFormProps> = ({
   const [difficulty, setDifficulty] = useState<'seimbang' | 'hots' | 'mudah'>('seimbang');
   const [additionalInstructions] = useState('');
 
-  // Validation Error State
+  // Validation Error State & Cross-tool prefill banner
   const [formError, setFormError] = useState<string | null>(null);
+  const [prefillNotification, setPrefillNotification] = useState<{
+    source: string;
+    topic: string;
+    subject: string;
+    grade: string;
+  } | null>(null);
+
+  // Load persistent profile defaults from localStorage
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    try {
+      const savedSchool = localStorage.getItem('edusoal_school_name');
+      const savedAcademicYear = localStorage.getItem('edusoal_academic_year');
+      if (savedSchool && !schoolName) setSchoolName(savedSchool);
+      if (savedAcademicYear) setAcademicYear(savedAcademicYear);
+    } catch (e) {
+      console.warn('Could not read saved profile:', e);
+    }
+  }, []);
 
   // Helper to synchronize topic and sub-material when subject, level, or curriculum changes
   const updateTopicAndSub = (lvl: EducationLevel, sub: string, curr: CurriculumType) => {
@@ -120,6 +143,57 @@ export const ExamForm: React.FC<ExamFormProps> = ({
       setSpecificMaterial('');
     }
   };
+
+  // Check URL Search Params for cross-tool prefill from Modul Ajar
+  useEffect(() => {
+    if (!searchParams) return;
+
+    const fromModul = searchParams.get('fromModul');
+    const paramSchool = searchParams.get('schoolName');
+    const paramLevel = searchParams.get('level') as EducationLevel | null;
+    const paramGrade = searchParams.get('grade');
+    const paramSubject = searchParams.get('subject');
+    const paramCurriculum = searchParams.get('curriculum') as CurriculumType | null;
+    const paramTopic = searchParams.get('topic');
+    const paramSubTopic = searchParams.get('subTopic') || searchParams.get('specificMaterial');
+
+    if (paramSchool) setSchoolName(paramSchool);
+    if (paramCurriculum) setCurriculum(paramCurriculum);
+
+    if (paramLevel && Object.keys(EDUCATION_LEVELS).includes(paramLevel)) {
+      setLevel(paramLevel);
+      const lvlInfo = EDUCATION_LEVELS[paramLevel];
+      if (paramGrade) {
+        setGrade(paramGrade);
+      } else if (lvlInfo && lvlInfo.grades.length > 0) {
+        const g = lvlInfo.grades[0];
+        setGrade(`${g.name} (${g.phase || ''})`.trim());
+      }
+
+      if (paramSubject) {
+        setSubject(paramSubject);
+      }
+    }
+
+    if (paramTopic) {
+      setTopic(paramTopic);
+      setSelectedTopicPreset('__custom__');
+    }
+
+    if (paramSubTopic) {
+      setSpecificMaterial(paramSubTopic);
+      setSelectedSubPreset('__custom__');
+    }
+
+    if (fromModul && (paramTopic || paramSubject)) {
+      setPrefillNotification({
+        source: 'Generator Modul Ajar & RPP',
+        topic: paramTopic || 'Materi Terkait',
+        subject: paramSubject || '',
+        grade: paramGrade || '',
+      });
+    }
+  }, [searchParams]);
 
   // Handle change of Level (Jenjang)
   const handleLevelChange = (newLevel: EducationLevel) => {
@@ -234,6 +308,16 @@ export const ExamForm: React.FC<ExamFormProps> = ({
 
     setFormError(null);
 
+    // Save profile defaults to localStorage for cross-tool synchronization
+    if (typeof window !== 'undefined') {
+      try {
+        localStorage.setItem('edusoal_school_name', schoolName.trim());
+        localStorage.setItem('edusoal_academic_year', academicYear);
+      } catch (err) {
+        console.warn('Failed to save profile cache:', err);
+      }
+    }
+
     let difficultyRatio = { lots: 30, mots: 50, hots: 20 };
     if (difficulty === 'hots') {
       difficultyRatio = { lots: 15, mots: 35, hots: 50 };
@@ -291,6 +375,35 @@ export const ExamForm: React.FC<ExamFormProps> = ({
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
+      {/* Prefill from Modul Ajar Banner */}
+      {prefillNotification && (
+        <div className="p-4 rounded-2xl bg-gradient-to-r from-purple-50 via-indigo-50 to-blue-50 border border-purple-200 text-purple-950 text-xs sm:text-sm flex items-start justify-between gap-3 shadow-xs animate-in fade-in slide-in-from-top-2 duration-200">
+          <div className="flex items-start gap-2.5">
+            <div className="p-1.5 rounded-xl bg-purple-600 text-white shrink-0 mt-0.5">
+              <BookText className="w-4 h-4" />
+            </div>
+            <div>
+              <span className="font-bold block text-purple-900">
+                ✨ Data Materi Berhasil Dimuat dari {prefillNotification.source}:
+              </span>
+              <p className="text-purple-800 mt-0.5">
+                Topik: <strong>{prefillNotification.topic}</strong> • Mapel: <strong>{prefillNotification.subject}</strong> {prefillNotification.grade && `• ${prefillNotification.grade}`}
+              </p>
+              <p className="text-[11px] text-purple-600 mt-1">
+                Formulir telah diselaraskan secara otomatis. Silakan pilih jenis asesmen & jumlah soal lalu klik Generate.
+              </p>
+            </div>
+          </div>
+          <button
+            type="button"
+            onClick={() => setPrefillNotification(null)}
+            className="text-purple-500 hover:text-purple-800 text-xs font-bold shrink-0 p-1 cursor-pointer"
+          >
+            ✕
+          </button>
+        </div>
+      )}
+
       {/* Form Error Banner */}
       {formError && (
         <div className="p-4 rounded-2xl bg-red-50 border border-red-200 text-red-900 text-xs sm:text-sm flex items-start gap-3 shadow-xs animate-in fade-in slide-in-from-top-2 duration-200">
@@ -439,7 +552,7 @@ export const ExamForm: React.FC<ExamFormProps> = ({
             <select
               value={curriculum}
               onChange={(e) => handleCurriculumChange(e.target.value as CurriculumType)}
-              className="w-full text-sm px-3.5 py-2 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 bg-white cursor-pointer"
+              className="w-full text-sm px-3.5 py-2.5 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 bg-white cursor-pointer"
             >
               {CURRICULA.map((c) => (
                 <option key={c.id} value={c.id}>
@@ -458,7 +571,7 @@ export const ExamForm: React.FC<ExamFormProps> = ({
               <select
                 value={grade}
                 onChange={(e) => setGrade(e.target.value)}
-                className="w-full text-sm px-3.5 py-2 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 bg-white cursor-pointer"
+                className="w-full text-sm px-3.5 py-2.5 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 bg-white cursor-pointer"
               >
                 {levelInfo.grades.map((g) => (
                   <option key={g.id} value={`${g.name} (${g.phase || ''})`.trim()}>
@@ -469,7 +582,7 @@ export const ExamForm: React.FC<ExamFormProps> = ({
             ) : (
               <select
                 disabled
-                className="w-full text-sm px-3.5 py-2 rounded-xl border border-slate-200 bg-slate-100 text-slate-400 cursor-not-allowed"
+                className="w-full text-sm px-3.5 py-2.5 rounded-xl border border-slate-200 bg-slate-100 text-slate-400 cursor-not-allowed"
               >
                 <option>-- Pilih Jenjang Terlebih Dahulu --</option>
               </select>
@@ -484,7 +597,7 @@ export const ExamForm: React.FC<ExamFormProps> = ({
             <select
               value={semester}
               onChange={(e) => setSemester(e.target.value)}
-              className="w-full text-sm px-3.5 py-2 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 bg-white cursor-pointer"
+              className="w-full text-sm px-3.5 py-2.5 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 bg-white cursor-pointer"
             >
               <option value="1 (Ganjil)">1 (Ganjil)</option>
               <option value="2 (Genap)">2 (Genap)</option>
@@ -505,7 +618,7 @@ export const ExamForm: React.FC<ExamFormProps> = ({
               <select
                 value={subject}
                 onChange={(e) => handleSubjectChange(e.target.value)}
-                className="w-full text-sm px-3.5 py-2 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 bg-white cursor-pointer"
+                className="w-full text-sm px-3.5 py-2.5 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 bg-white cursor-pointer"
               >
                 {availableSubjects.map((sub) => (
                   <option key={sub} value={sub}>
@@ -516,7 +629,7 @@ export const ExamForm: React.FC<ExamFormProps> = ({
             ) : (
               <select
                 disabled
-                className="w-full text-sm px-3.5 py-2 rounded-xl border border-slate-200 bg-slate-100 text-slate-400 cursor-not-allowed"
+                className="w-full text-sm px-3.5 py-2.5 rounded-xl border border-slate-200 bg-slate-100 text-slate-400 cursor-not-allowed"
               >
                 <option>-- Pilih Jenjang Terlebih Dahulu --</option>
               </select>
@@ -839,4 +952,3 @@ export const ExamForm: React.FC<ExamFormProps> = ({
     </form>
   );
 };
-

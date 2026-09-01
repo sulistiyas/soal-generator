@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
+import Link from 'next/link';
 import { ModulAjarData } from '@/types/modul-ajar';
 import { exportModulAjarToDocx } from '@/lib/modul-ajar-docx';
 import { trackEvent } from '@/lib/analytics';
@@ -22,11 +23,15 @@ import {
   Award,
   ListChecks,
   Compass,
+  FileQuestion,
+  RefreshCw,
+  ArrowRight,
 } from 'lucide-react';
 
 interface ModulAjarPreviewProps {
   modul: ModulAjarData;
   onUpdateModul?: (updated: ModulAjarData) => void;
+  onReset?: () => void;
   shareUrl?: string;
 }
 
@@ -35,6 +40,7 @@ type ActiveTab = 'dokumen' | 'skenario' | 'asesmen' | 'lkpd';
 export const ModulAjarPreview: React.FC<ModulAjarPreviewProps> = ({
   modul,
   onUpdateModul,
+  onReset,
   shareUrl,
 }) => {
   const [activeTab, setActiveTab] = useState<ActiveTab>('dokumen');
@@ -150,8 +156,54 @@ Guru Pengampu: ${modul.identitas?.namaPenyusun || ''} (NIP: ${modul.identitas?.n
 
   const currentModul = isEditing ? editedModul : modul;
 
+  // Cross-tool deep link to Soal Generator with matching subject, grade, and topic
+  const soalGeneratorUrl = `/tools/soal-generator?fromModul=true&schoolName=${encodeURIComponent(
+    modul.identitas?.namaSekolah || ''
+  )}&level=${encodeURIComponent(
+    modul.identitas?.jenjang?.toLowerCase() || ''
+  )}&grade=${encodeURIComponent(
+    modul.identitas?.faseKelas || ''
+  )}&subject=${encodeURIComponent(
+    modul.identitas?.mataPelajaran || ''
+  )}&curriculum=${encodeURIComponent(
+    modul.format === 'rpp_1_lembar' ? 'k13' : 'merdeka'
+  )}&topic=${encodeURIComponent(
+    modul.identitas?.topikMateri || ''
+  )}&subTopic=${encodeURIComponent(
+    modul.komponenInti?.tujuanPembelajaran?.[0] || ''
+  )}`;
+
   return (
     <div className="space-y-6">
+      {/* Cross-Tool Connection Recommendation Banner */}
+      <div className="bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 rounded-2xl p-4 sm:p-5 text-white shadow-md flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4 print:hidden animate-fade-in">
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-10 rounded-xl bg-white/20 backdrop-blur flex items-center justify-center shrink-0">
+            <FileQuestion className="w-5 h-5 text-white" />
+          </div>
+          <div>
+            <span className="text-xs font-semibold text-blue-200 uppercase tracking-wider block">
+              Integrasi Evaluasi & Asesmen Guru Cerdas
+            </span>
+            <h3 className="font-bold text-sm sm:text-base text-white">
+              Ingin membuat Paket Soal Ujian / Kuis untuk materi &quot;{modul.identitas?.topikMateri || modul.identitas?.mataPelajaran}&quot;?
+            </h3>
+            <p className="text-xs text-blue-100/90 hidden sm:block">
+              Buat naskah soal PG, Isian, Essay, kisi-kisi, dan kunci jawaban otomatis yang selaras dengan tujuan modul ajar ini.
+            </p>
+          </div>
+        </div>
+
+        <Link
+          href={soalGeneratorUrl}
+          className="min-h-[42px] inline-flex items-center justify-center gap-2 px-4 py-2 rounded-xl bg-white hover:bg-blue-50 active:bg-blue-100 text-blue-900 font-bold text-xs sm:text-sm shadow-sm transition-all shrink-0 cursor-pointer"
+        >
+          <Sparkles className="w-4 h-4 text-blue-600" />
+          <span>Buat Paket Soal untuk Modul Ini</span>
+          <ArrowRight className="w-3.5 h-3.5" />
+        </Link>
+      </div>
+
       {/* ACTION BAR (Hidden on Print) */}
       <div className="bg-white p-4 sm:p-5 rounded-3xl border border-slate-200/90 shadow-md flex flex-col md:flex-row items-stretch md:items-center justify-between gap-4 print:hidden">
         {/* Left Badges */}
@@ -246,6 +298,19 @@ Guru Pengampu: ${modul.identitas?.namaPenyusun || ''} (NIP: ${modul.identitas?.n
                 <span>{isEditing ? 'Simpan' : 'Edit Cepat'}</span>
               </button>
             )}
+
+            {/* Reset / Baru Button */}
+            {onReset && (
+              <button
+                type="button"
+                onClick={onReset}
+                className="min-h-[42px] inline-flex items-center justify-center gap-1.5 px-3.5 py-2 rounded-xl text-slate-600 hover:text-slate-900 bg-slate-100 hover:bg-slate-200 active:bg-slate-300 text-xs transition-colors cursor-pointer"
+                title="Buat Modul Ajar Baru"
+              >
+                <RefreshCw className="w-3.5 h-3.5" />
+                <span>Baru</span>
+              </button>
+            )}
           </div>
         </div>
       </div>
@@ -317,7 +382,7 @@ Guru Pengampu: ${modul.identitas?.namaPenyusun || ''} (NIP: ${modul.identitas?.n
               {docTitle}
             </h2>
             <p className="text-xs font-semibold text-slate-700 font-serif">
-              TAHUN AJARAN {currentModul.identitas?.tahunAjaran || '2024/2025'} — SEMESTER {currentModul.identitas?.semester || 'GANJIL'}
+              TAHUN AJARAN {currentModul.identitas?.tahunAjaran || '2025/2026'} — SEMESTER {currentModul.identitas?.semester || 'GANJIL'}
             </p>
           </div>
 
@@ -522,7 +587,7 @@ Guru Pengampu: ${modul.identitas?.namaPenyusun || ''} (NIP: ${modul.identitas?.n
               <p className="text-slate-500">NIP. {currentModul.identitas?.kepalaSekolah?.nip || '-'}</p>
             </div>
             <div className="space-y-1">
-              <p>................, .................... 2024</p>
+              <p>................, .................... 2026</p>
               <p className="font-bold">Guru Mata Pelajaran</p>
               <div className="h-14 sm:h-16" />
               <p className="font-bold underline">{currentModul.identitas?.namaPenyusun || 'Guru Pengampu'}</p>
@@ -563,7 +628,7 @@ Guru Pengampu: ${modul.identitas?.namaPenyusun || ''} (NIP: ${modul.identitas?.n
                   <div className="absolute -left-[31px] top-0 w-4 h-4 rounded-full bg-amber-500 border-2 border-white shadow" />
                   <div className="flex items-center gap-2">
                     <span className="px-2 py-0.5 rounded bg-amber-100 text-amber-800 text-[11px] font-bold">
-                      0' - {kegiatan.pendahuluan?.alokasiMenit || 10}'
+                      0&apos; - {kegiatan.pendahuluan?.alokasiMenit || 10}&apos;
                     </span>
                     <h4 className="font-bold text-xs sm:text-sm text-slate-900">Kegiatan Pendahuluan</h4>
                   </div>
@@ -603,7 +668,7 @@ Guru Pengampu: ${modul.identitas?.namaPenyusun || ''} (NIP: ${modul.identitas?.n
                   <div className="absolute -left-[31px] top-0 w-4 h-4 rounded-full bg-emerald-500 border-2 border-white shadow" />
                   <div className="flex items-center gap-2">
                     <span className="px-2 py-0.5 rounded bg-emerald-100 text-emerald-800 text-[11px] font-bold">
-                      {kegiatan.penutup?.alokasiMenit || 10}' Terakhir
+                      {kegiatan.penutup?.alokasiMenit || 10}&apos; Terakhir
                     </span>
                     <h4 className="font-bold text-xs sm:text-sm text-slate-900">Kegiatan Penutup & Refleksi</h4>
                   </div>

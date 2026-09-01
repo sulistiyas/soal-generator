@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useMemo, useSyncExternalStore } from 'react';
+import React, { useState, useMemo, useSyncExternalStore, Suspense } from 'react';
 import Link from 'next/link';
 import { Navbar } from '@/components/Navbar';
 import { ApiKeyModal } from '@/components/ApiKeyModal';
@@ -340,12 +340,14 @@ export default function SoalGeneratorToolPage() {
             </div>
 
             {/* Form Input */}
-            <ExamForm
-              onGenerate={handleGenerate}
-              isLoading={isLoading}
-              aiSettings={aiSettings}
-              onOpenApiKeyModal={() => setIsApiKeyModalOpen(true)}
-            />
+            <Suspense fallback={<div className="p-8 text-center text-xs text-slate-400 bg-white rounded-2xl border border-slate-200">Memuat formulir generator soal...</div>}>
+              <ExamForm
+                onGenerate={handleGenerate}
+                isLoading={isLoading}
+                aiSettings={aiSettings}
+                onOpenApiKeyModal={() => setIsApiKeyModalOpen(true)}
+              />
+            </Suspense>
 
             {/* Recent Exams History */}
             <RecentExamsHistory />

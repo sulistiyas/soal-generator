@@ -4,7 +4,7 @@ import { ModulAjarData, ModulAjarGenerationRequest } from '@/types/modul-ajar';
 export async function generateModulAjarWithGemini(
   request: ModulAjarGenerationRequest,
   apiKey: string,
-  modelName: string = 'gemini-2.5-flash'
+  modelName: string = 'gemini-3.6-flash'
 ): Promise<ModulAjarData> {
   if (!apiKey) {
     throw new Error('API Key Google Gemini belum diatur. Silakan masukkan API Key di menu pengaturan atau file .env.local.');
