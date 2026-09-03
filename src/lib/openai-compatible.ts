@@ -161,8 +161,8 @@ Struktur JSON yang WAJIB dihasilkan:
 
   // Optional headers for OpenRouter
   if (provider === 'openrouter') {
-    headers['HTTP-Referer'] = 'https://soal-generator.local';
-    headers['X-Title'] = 'Generator Soal Indonesia';
+    headers['HTTP-Referer'] = 'https://teacher-hub-edu.vercel.app';
+    headers['X-Title'] = 'Teacher Hub - Generator Soal AI';
   }
 
   const payload: Record<string, unknown> = {

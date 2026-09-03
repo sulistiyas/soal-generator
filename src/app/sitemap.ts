@@ -22,15 +22,15 @@ export default function sitemap(): MetadataRoute.Sitemap {
     },
   ];
 
-  // 2. Halaman Alat Bantu Lainnya (Coming Soon / Active)
-  const toolRoutes: MetadataRoute.Sitemap = TEACHER_TOOLS.filter(
-    (tool) => tool.path !== '/tools/soal-generator'
+  // 2. Halaman Alat Bantu Aktif
+  const activeToolRoutes: MetadataRoute.Sitemap = TEACHER_TOOLS.filter(
+    (tool) => tool.status === 'active' && tool.path !== '/tools/soal-generator'
   ).map((tool) => ({
     url: `${baseUrl}${tool.path}`,
     lastModified: currentDate,
-    changeFrequency: 'monthly',
-    priority: tool.status === 'active' ? 0.9 : 0.7,
+    changeFrequency: 'weekly',
+    priority: 0.9,
   }));
 
-  return [...mainRoutes, ...toolRoutes];
+  return [...mainRoutes, ...activeToolRoutes];
 }

@@ -49,3 +49,6 @@ claude.md
 *.md
 !README.md
 
+# Helper scripts and automation
+/scripts/
+

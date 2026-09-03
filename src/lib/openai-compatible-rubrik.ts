@@ -268,8 +268,8 @@ STRUKTUR JSON YANG WAJIB DIHASILKAN (Kembalikan JSON valid):
   }
 
   if (provider === 'openrouter') {
-    headers['HTTP-Referer'] = 'https://soal-generator.vercel.app';
-    headers['X-Title'] = 'Teacher Tools Hub - Rubrik AI';
+    headers['HTTP-Referer'] = 'https://teacher-hub-edu.vercel.app';
+    headers['X-Title'] = 'Teacher Hub - Rubrik AI';
   }
 
   const requestBody: Record<string, unknown> = {

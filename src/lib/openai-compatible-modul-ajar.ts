@@ -283,8 +283,8 @@ Buatkan data Modul Ajar di atas dengan detail lengkap, mendalam, dan disesuaikan
   }
 
   if (provider === 'openrouter') {
-    headers['HTTP-Referer'] = 'https://soal-generator.vercel.app';
-    headers['X-Title'] = 'Teacher Tools Hub - Modul Ajar Generator';
+    headers['HTTP-Referer'] = 'https://teacher-hub-edu.vercel.app';
+    headers['X-Title'] = 'Teacher Hub - Modul Ajar Generator';
   }
 
   const response = await fetch(url, {

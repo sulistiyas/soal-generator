@@ -9,47 +9,50 @@ export function getSiteUrl(): string {
     return url.startsWith('http') ? url : `https://${url}`;
   }
 
-  // 2. Cek production URL bawaan Vercel
+  // 2. Jika di environment lokal development tanpa env khusus, gunakan localhost
+  if (process.env.NODE_ENV === 'development') {
+    return 'http://localhost:3000';
+  }
+
+  // 3. Cek production URL bawaan Vercel
   if (process.env.VERCEL_PROJECT_PRODUCTION_URL) {
     return `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}`;
   }
 
-  // 3. Cek deployment URL Vercel (preview / branch)
-  if (process.env.VERCEL_URL) {
-    return `https://${process.env.VERCEL_URL}`;
-  }
-
-  // 4. Fallback ke localhost untuk pengembangan lokal
-  return 'http://localhost:3000';
+  // 4. Default target domain produksi
+  return 'https://teacher-hub-edu.vercel.app';
 }
 
 export const siteConfig = {
-  name: 'Teacher Tools Hub',
-  shortName: 'EduSoal AI',
-  title: 'Teacher Tools Hub - Portal Kumpulan Alat Bantu Guru Berbasis AI',
+  name: 'Teacher Hub',
+  shortName: 'TeacherHub',
+  title: 'Teacher Hub - Portal Kumpulan Alat Bantu Guru Berbasis AI Indonesia',
   description:
-    'Portal terintegrasi alat bantu guru berbasis AI gratis di Indonesia untuk membuat naskah soal ujian (Pilihan Ganda, Essay, Isian, Benar/Salah), kisi-kisi soal, rubrik asesmen, modul ajar Kurikulum Merdeka & K-13, dan ekspor ke format Microsoft Word (.docx).',
+    'Portal alat bantu guru berbasis AI gratis di Indonesia untuk membuat naskah soal ujian otomatis (Pilihan Ganda, Essay, Isian, Benar/Salah), kisi-kisi, rubrik penilaian, modul ajar Kurikulum Merdeka & K-13, dan ekspor ke Microsoft Word (.docx).',
   keywords: [
+    'teacher hub',
+    'teacher-hub-edu',
     'teacher tools hub',
-    'alat bantu guru ai',
     'generator soal ai',
     'pembuat soal otomatis',
+    'generator modul ajar ai',
+    'modul ajar kurikulum merdeka',
     'kisi kisi ujian kurikulum merdeka',
-    'bank soal kurikulum merdeka',
-    'modul ajar ai',
-    'rpp 1 lembar kurikulum merdeka',
     'rubrik penilaian asesmen',
-    'aplikasi guru indonesia',
+    'rpp 1 lembar kurikulum merdeka',
+    'bank soal kurikulum merdeka',
     'soal hots lots mots',
+    'alat bantu guru ai',
+    'aplikasi guru indonesia',
     'ekspor soal word docx',
-    'guru sd smp sma smk',
+    'guru sd smp sma smk madrasah',
   ],
   author: {
     name: 'Sulistiya Nugroho & Tim Komunitas Guru Indonesia',
     url: 'https://saweria.co/sulistiyanugroho',
   },
   creator: 'Sulistiya Nugroho',
-  publisher: 'Teacher Tools Hub Indonesia',
+  publisher: 'Teacher Hub Indonesia',
   themeColor: '#4f46e5',
   backgroundColor: '#f8fafc',
   locale: 'id_ID',

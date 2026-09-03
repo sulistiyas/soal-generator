@@ -76,7 +76,9 @@ export const metadata: Metadata = {
     },
   },
   verification: {
-    google: process.env.NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION || undefined,
+    google:
+      process.env.NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION ||
+      'EZGzruKZCXFxNGzfOouPPxQYLYu2xel7IZizrapRZ3Y',
   },
 };
 
@@ -118,6 +120,7 @@ export default function RootLayout({
         description: siteConfig.description,
         featureList: [
           "Generator Naskah Soal Ujian AI Multi-Format (Pilihan Ganda, Essay, Isian, Benar-Salah)",
+          "Generator Modul Ajar Kurikulum Merdeka & RPP 1 Lembar",
           "Penyusunan Kisi-Kisi & Rubrik Asesmen Pembelajaran",
           "Dukungan Kurikulum Merdeka & Kurikulum 2013",
           "Ekspor Langsung ke Dokumen Microsoft Word (.docx)",
@@ -139,6 +142,11 @@ export default function RootLayout({
       className={`${plusJakarta.variable} ${jetbrainsMono.variable} h-full antialiased scroll-smooth`}
     >
       <head>
+        {/* Google Search Console Verification */}
+        <meta
+          name="google-site-verification"
+          content="EZGzruKZCXFxNGzfOouPPxQYLYu2xel7IZizrapRZ3Y"
+        />
         {/* JSON-LD Structured Data untuk Google Search */}
         <script
           type="application/ld+json"

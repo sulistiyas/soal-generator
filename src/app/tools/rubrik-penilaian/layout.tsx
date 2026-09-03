@@ -1,7 +1,10 @@
 import { Metadata } from 'next';
+import { getSiteUrl } from '@/lib/site-config';
+
+const baseUrl = getSiteUrl();
 
 export const metadata: Metadata = {
-  title: 'Pembuat Kisi-Kisi & Rubrik Penilaian AI | Teacher Tools Hub',
+  title: 'Pembuat Kisi-Kisi & Rubrik Penilaian AI | Teacher Hub',
   description:
     'Rancang matriks kisi-kisi soal ujian dan rubrik penilaian analitik/holistik standar Kemendikbudristek secara otomatis dengan AI. Ekspor langsung ke Microsoft Word (.docx).',
   keywords: [
@@ -11,19 +14,23 @@ export const metadata: Metadata = {
     'kisi-kisi ujian sekolah',
     'kktp kurikulum merdeka',
     'pedoman penskoran essay',
+    'teacher hub',
     'teacher tools hub',
     'generator soal dan kisi-kisi',
   ],
+  alternates: {
+    canonical: '/tools/rubrik-penilaian',
+  },
   openGraph: {
-    title: 'Pembuat Kisi-Kisi & Rubrik Penilaian AI | Teacher Tools Hub',
+    title: 'Pembuat Kisi-Kisi & Rubrik Penilaian AI | Teacher Hub',
     description:
       'Susun matriks kisi-kisi soal, rubrik analitik 4 skala capaian, dan pedoman penskoran otomatis dengan AI. Gratis dan siap ekspor ke Microsoft Word (.docx).',
-    url: 'https://soal-generator.vercel.app/tools/rubrik-penilaian',
+    url: `${baseUrl}/tools/rubrik-penilaian`,
     type: 'website',
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Pembuat Kisi-Kisi & Rubrik Penilaian AI | Teacher Tools Hub',
+    title: 'Pembuat Kisi-Kisi & Rubrik Penilaian AI | Teacher Hub',
     description:
       'Susun matriks kisi-kisi soal, rubrik analitik 4 skala capaian, dan pedoman penskoran otomatis dengan AI. Gratis dan siap ekspor ke Microsoft Word (.docx).',
   },
